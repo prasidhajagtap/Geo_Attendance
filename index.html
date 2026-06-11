@@ -6,7 +6,7 @@
   <title>Seamex · Geo Attendance</title>
 
   <!--
-    SEAMEX GEO-ATTENDANCE | index.html | v09
+    SEAMEX GEO-ATTENDANCE | index.html | v11 (single-file)
     Author : Prasidha Jagtap
     Role   : Assistant Manager IT, Aditya Birla Group (Seamex)
     Deploy : onehruat.poornata.com — Script Editor Web Part
@@ -51,7 +51,1118 @@
   </script>
 
   <!-- App stylesheet -->
-  <link rel="stylesheet" href="style.css">
+  <style>
+/*
+ * ══════════════════════════════════════════════════════════════
+ *  SEAMEX GEO-ATTENDANCE  |  style.css  |  v09
+ *  Author : Prasidha Jagtap
+ *  Role   : Assistant Manager – IT, Aditya Birla Group (Seamex)
+ *
+ *  v09 CHANGES
+ *  ─────────────────────────────────────────────────────────────
+ *  · Full iframe-safe rewrite — body/html scoped to work inside
+ *    SharePoint iframe container without layout bleed
+ *  · Production-grade alignment — all elements centered, padded,
+ *    and spaced correctly at every breakpoint
+ *  · Logo background fixed — transparent PNG, no black fill
+ *  · SharePoint master page conflict neutralizer tightened
+ *  · DM Sans + DM Mono enforced via !important inside .smx-card
+ * ══════════════════════════════════════════════════════════════
+ */
+
+/* ================================================================
+   0. IFRAME + SHAREPOINT RESET — Prasidha Jagtap v09
+   Must come first. Scopes everything inside .smx-wrap so SP
+   master page styles cannot bleed in at all.
+================================================================ */
+.smx-wrap, .smx-wrap * {
+  box-sizing: border-box !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.smx-wrap { all: initial; display: block; }
+
+/* Neutralize SP table layout */
+.smx-wrap table, .smx-wrap tr, .smx-wrap td, .smx-wrap th {
+  all: unset; display: revert;
+}
+
+/* Force fonts inside card */
+.smx-card,
+.smx-card input,
+.smx-card button,
+.smx-card p,
+.smx-card div,
+.smx-card span,
+.smx-card label {
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+  line-height: normal !important;
+}
+
+.smx-card .mono,
+.smx-card .mhr-clock,
+.smx-card .dur-val,
+.smx-card .mhl-id,
+.smx-card .sc-val,
+.smx-card .az-pid,
+.smx-card .az-detect-msg {
+  font-family: 'DM Mono', monospace !important;
+}
+
+/* ================================================================
+   1. DESIGN TOKENS — Prasidha
+================================================================ */
+:root {
+  --red:      #A6192E;
+  --red-dk:   #7d1220;
+  --orange:   #F58220;
+  --yellow:   #FFCB05;
+  --grad:     linear-gradient(135deg, #F58220, #FFCB05);
+  --green:    #16a34a;
+
+  --r-sm:   .5rem;
+  --r-md:   .75rem;
+  --r-lg:   1rem;
+  --r-xl:   1.5rem;
+  --r-pill: 999px;
+
+  --ease:   cubic-bezier(.4,0,.2,1);
+  --spring: cubic-bezier(.22,1,.36,1);
+  --t:      .22s;
+
+  --sh-sm: 0 2px 10px  rgba(0,0,0,.07);
+  --sh-md: 0 8px 28px  rgba(0,0,0,.10);
+  --sh-lg: 0 16px 48px rgba(0,0,0,.16);
+}
+
+[data-theme="light"] {
+  --bg-a:    #edf2f7;
+  --bg-b:    #dce6f0;
+  --bg-card: rgba(255,255,255,.96);
+  --bg-solid:#fff;
+  --bg-in:   rgba(255,255,255,.98);
+  --bg-sub:  rgba(248,250,253,.96);
+  --bdr:     rgba(0,0,0,.09);
+  --tx:      #1a1a2e;
+  --tx2:     #4a5568;
+  --txm:     #8a9ab5;
+  --chip-bg: rgba(166,25,46,.07);
+  --chip-bdr:rgba(166,25,46,.18);
+  --chip-tx: var(--red);
+  --sk-a:    rgba(0,0,0,.07);
+  --sk-b:    rgba(0,0,0,.03);
+}
+
+[data-theme="dark"] {
+  --bg-a:    #0c0c1a;
+  --bg-b:    #121224;
+  --bg-card: rgba(22,22,42,.97);
+  --bg-solid:#181830;
+  --bg-in:   rgba(255,255,255,.07);
+  --bg-sub:  rgba(255,255,255,.04);
+  --bdr:     rgba(255,255,255,.09);
+  --tx:      #e8edf5;
+  --tx2:     #8a9fc0;
+  --txm:     #50607a;
+  --chip-bg: rgba(245,130,32,.12);
+  --chip-bdr:rgba(245,130,32,.25);
+  --chip-tx: var(--orange);
+  --sk-a:    rgba(255,255,255,.08);
+  --sk-b:    rgba(255,255,255,.02);
+}
+
+/* ================================================================
+   2. BASE — iframe-safe body
+   When hosted inside SP iframe, body may be constrained.
+   Use min-height:100% not 100dvh to avoid iframe overflow.
+================================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; }
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: linear-gradient(160deg, var(--bg-a), var(--bg-b));
+  background-attachment: fixed;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;   /* iframe: start not center */
+  padding: 16px 12px 24px;
+  overflow-x: hidden;
+  position: relative;
+  transition: background .5s ease;
+  margin: 0;
+}
+
+/* ================================================================
+   3. AMBIENT BACKGROUND — CRED-style time-of-day
+================================================================ */
+body::before, body::after {
+  content: ''; position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+}
+body[data-tod="dawn"]::before {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255,140,60,.16), transparent),
+    radial-gradient(ellipse 40% 30% at 50% 85%, rgba(255,200,100,.10), transparent);
+  animation: ambPulse 8s ease infinite alternate;
+}
+body[data-tod="dawn"]::after {
+  background:
+    radial-gradient(circle 4px at 22% 28%, rgba(255,190,90,.5), transparent),
+    radial-gradient(circle 2px at 70% 18%, rgba(255,200,110,.4), transparent);
+  animation: ambFloat 11s ease infinite alternate;
+}
+body[data-tod="day"]::before {
+  background:
+    radial-gradient(ellipse 60% 40% at 72% 8%, rgba(255,255,180,.18), transparent),
+    radial-gradient(ellipse 30% 22% at 18% 14%, rgba(200,230,255,.12), transparent);
+  animation: ambPulse 10s ease infinite alternate;
+}
+body[data-tod="day"]::after {
+  background:
+    radial-gradient(ellipse 130px 32px at 22% 10%, rgba(255,255,255,.18), transparent),
+    radial-gradient(ellipse 80px 20px at 64% 7%, rgba(255,255,255,.12), transparent);
+  animation: ambDrift 20s linear infinite;
+}
+body[data-tod="dusk"]::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(220,90,30,.18), transparent),
+    radial-gradient(ellipse 50% 35% at 82% 88%, rgba(255,160,60,.12), transparent);
+  animation: ambPulse 7s ease infinite alternate;
+}
+body[data-tod="dusk"]::after {
+  background:
+    radial-gradient(circle 3px at 14% 24%, rgba(255,120,50,.45), transparent),
+    radial-gradient(circle 2px at 85% 34%, rgba(255,180,60,.38), transparent);
+  animation: ambFloat 9s ease infinite alternate;
+}
+body[data-tod="night"]::before {
+  background:
+    radial-gradient(ellipse 50% 38% at 82% 14%, rgba(100,120,210,.10), transparent),
+    radial-gradient(ellipse 30% 18% at 18% 10%, rgba(80,90,180,.08), transparent);
+  animation: ambPulse 12s ease infinite alternate;
+}
+body[data-tod="night"]::after {
+  background:
+    radial-gradient(circle 1.5px at 10% 8%, rgba(255,255,255,.70), transparent),
+    radial-gradient(circle 1px at 26% 15%, rgba(255,255,255,.50), transparent),
+    radial-gradient(circle 2px at 62% 5%, rgba(255,255,255,.60), transparent),
+    radial-gradient(circle 1px at 81% 12%, rgba(255,255,255,.50), transparent);
+  animation: ambTwinkle 4s ease infinite alternate;
+}
+@keyframes ambPulse   { from{opacity:.5} to{opacity:1} }
+@keyframes ambFloat   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+@keyframes ambDrift   { from{transform:translateX(-5px)} to{transform:translateX(10px)} }
+@keyframes ambTwinkle { 0%,100%{opacity:.45} 50%{opacity:1} }
+
+/* ================================================================
+   4. CARD + CONTAINER — v09 iframe-safe sizing
+================================================================ */
+main.smx-root {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.smx-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r-xl);
+  padding: 24px 20px 20px;
+  box-shadow: var(--sh-md);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  transition: background var(--t) var(--ease);
+  width: 100%;
+}
+
+/* ================================================================
+   5. RESPONSIVE — Prasidha v09
+   Optimised for iframe embedded in SharePoint WebView
+================================================================ */
+@media (max-width: 374px) {
+  body           { padding: 8px 8px 16px; }
+  main.smx-root  { max-width: 100%; }
+  .smx-card      { padding: 16px 14px 16px; border-radius: var(--r-lg); }
+  .auth-logo     { width: 80px !important; }
+  .logo-sm       { width: 44px !important; }
+  input[type="text"] { padding: 10px 12px !important; font-size: .86rem !important; }
+  .btn-full      { padding: 12px !important; font-size: .88rem !important; }
+  .mhl-name      { font-size: .82rem !important; }
+  .mhr-clock     { font-size: .76rem !important; }
+}
+@media (min-width: 375px) and (max-width: 480px) {
+  body           { padding: 12px 10px 20px; }
+  main.smx-root  { max-width: 100%; }
+  .smx-card      { border-radius: var(--r-lg); }
+}
+@media (min-width: 481px) and (max-width: 900px) {
+  main.smx-root  { max-width: 460px; }
+  .smx-card      { padding: 28px 24px 20px; }
+}
+@media (min-width: 901px) {
+  main.smx-root  { max-width: 440px; }
+}
+@media (min-width: 540px) and (max-width: 900px) and (orientation: landscape) {
+  body           { justify-content: flex-start; overflow-y: auto; }
+  .smx-card      { padding: 16px 22px; }
+}
+
+/* ================================================================
+   6. PAGE TRANSITION
+================================================================ */
+#pg-tr {
+  position: fixed; inset: 0; z-index: 500;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--bg-a);
+  opacity: 0; pointer-events: none;
+  transition: opacity .32s var(--ease);
+}
+#pg-tr.on { opacity: 1; pointer-events: all; }
+.pt-wrap   { position: relative; width: 88px; height: 88px; margin-bottom: 18px; }
+.pt-wrap svg { width: 88px; height: 88px; }
+.pt-ring {
+  position: absolute; inset: -12px; border-radius: 50%;
+  border: 2px solid var(--orange);
+  animation: ptRing 1.2s ease infinite;
+}
+@keyframes ptRing {
+  0%  { transform: scale(.84); opacity: .8; }
+  50% { transform: scale(1.12); opacity: .3; }
+  100%{ transform: scale(.84); opacity: .8; }
+}
+.pt-parts { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.pt-p { position: absolute; font-size: 1.2rem; opacity: 0; animation: ptFloat 1.5s ease forwards; }
+@keyframes ptFloat {
+  0%  { opacity: 0; transform: translateY(0) scale(.7); }
+  20% { opacity: 1; }
+  80% { opacity: .8; }
+  100%{ opacity: 0; transform: translateY(-86px) scale(1.05); }
+}
+.pt-msg { font-size: .8rem; font-weight: 500; font-style: italic; color: var(--tx2); animation: ptPulse 1.5s ease infinite; }
+@keyframes ptPulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+#pt-h, #pt-m, #pt-s {
+  transform-origin: 36px 36px;
+  transition: transform .9s cubic-bezier(.45,.05,.55,.95);
+}
+#pt-s { transition-duration: .5s !important; }
+
+/* ================================================================
+   7. TOAST OVERLAY
+================================================================ */
+.toast-ov {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.08);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  pointer-events: none;
+  animation: toOvIn .22s ease forwards;
+}
+.toast-ov.to-out { animation: toOvOut .28s ease forwards; }
+@keyframes toOvIn  { from{opacity:0} to{opacity:1} }
+@keyframes toOvOut { from{opacity:1} to{opacity:0} }
+.toast-pill {
+  padding: 12px 24px;
+  border-radius: var(--r-pill);
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: .86rem; font-weight: 600;
+  background: rgba(28,28,50,.92); color: #fff;
+  box-shadow: var(--sh-lg);
+  max-width: min(84vw, 300px); text-align: center;
+  animation: toPillUp .3s var(--spring) forwards;
+}
+.toast-pill.ok  { background: rgba(21,128,61,.92); }
+.toast-pill.err { background: rgba(185,28,28,.92); }
+@keyframes toPillUp {
+  from { opacity: 0; transform: scale(.9) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)  translateY(0); }
+}
+
+/* ================================================================
+   8. MODAL OVERLAY
+================================================================ */
+#modal-ov {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(0,0,0,.46);
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; opacity: 0; pointer-events: none;
+  transition: opacity .28s var(--ease);
+}
+#modal-ov.open { opacity: 1; pointer-events: all; }
+.modal-card {
+  background: var(--bg-solid); border: 1px solid var(--bdr);
+  border-radius: var(--r-xl); padding: 26px 22px;
+  width: 100%; max-width: 320px; box-shadow: var(--sh-lg);
+  transform: translateY(16px) scale(.97);
+  transition: transform .28s var(--ease);
+}
+#modal-ov.open .modal-card { transform: translateY(0) scale(1); }
+.m-icon  { text-align: center; font-size: 2rem; margin-bottom: 8px; }
+.m-title { font-size: 1rem; font-weight: 700; color: var(--tx); text-align: center; margin-bottom: 6px; }
+.m-body  { font-size: .82rem; color: var(--tx2); text-align: center; line-height: 1.55; margin-bottom: 18px; }
+.m-btns  { display: flex; gap: 8px; }
+.m-btns .btn-full { margin: 0 !important; flex: 1; }
+
+/* ================================================================
+   9. AUTH LAYOUT — v09 centered, production aligned
+================================================================ */
+.auth-hdr {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-top: 4px;
+}
+.auth-logo {
+  display: block;
+  width: 120px;
+  height: auto;
+  margin: 0 auto 10px;
+  /* No background — logo PNG is transparent */
+  background: transparent !important;
+  filter: drop-shadow(0 2px 8px rgba(166,25,46,.15));
+}
+.mod-name {
+  font-size: .85rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--red); margin: 6px 0 4px;
+  text-align: center;
+}
+#daily-greet {
+  font-size: .76rem; font-style: italic; font-weight: 500;
+  color: var(--orange); margin: 4px 0 0; text-align: center;
+}
+.auth-title {
+  font-size: 1.1rem; font-weight: 700;
+  text-align: center; color: var(--tx);
+  margin: 0 0 18px;
+  line-height: 1.3;
+}
+
+/* Azure detecting state */
+.az-detect-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 14px;
+  padding: 24px 16px 16px;
+}
+.az-detect-spinner {
+  width: 34px; height: 34px;
+  border: 3px solid rgba(166,25,46,.15);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: azSpin .85s linear infinite;
+}
+@keyframes azSpin { to { transform: rotate(360deg); } }
+.az-detect-msg {
+  font-family: 'DM Mono', monospace !important;
+  font-size: .72rem; color: var(--txm);
+  letter-spacing: .5px; text-align: center; margin: 0;
+}
+.az-fallback-note {
+  font-size: .73rem; color: var(--red); font-weight: 600;
+  text-align: center;
+  background: rgba(166,25,46,.06);
+  border: 1px solid rgba(166,25,46,.18);
+  border-radius: var(--r-md);
+  padding: 8px 12px; margin: 0 0 14px;
+}
+
+/* ================================================================
+   10. MAIN HEADER — v09 production aligned
+================================================================ */
+.main-hdr {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px; margin-bottom: 16px;
+}
+.mhl { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+.mhl-avatar-slot {
+  width: 40px; height: 40px; border-radius: 50%;
+  overflow: hidden; flex-shrink: 0;
+  border: 2px solid var(--bdr);
+  background: rgba(166,25,46,.08);
+  display: flex; align-items: center; justify-content: center;
+}
+.mhl-avatar-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mhl-avatar-initials {
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 14px; font-weight: 700; color: var(--red);
+}
+.mhl-text { flex: 1; min-width: 0; }
+.mhl-name {
+  font-size: 1rem; font-weight: 700; color: var(--tx);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.mhl-id {
+  font-size: .7rem; color: var(--txm);
+  font-family: 'DM Mono', monospace !important;
+  margin-top: 3px; letter-spacing: .5px;
+}
+.mhr { text-align: right; flex-shrink: 0; }
+.logo-sm {
+  width: 56px; height: auto; display: block;
+  margin-left: auto; margin-bottom: 6px;
+  background: transparent !important;
+  filter: drop-shadow(0 2px 6px rgba(166,25,46,.12));
+}
+.mhr-mod {
+  font-size: .6rem; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--red);
+  border: 1.5px solid rgba(166,25,46,.28);
+  border-radius: 6px;
+  padding: 3px 8px;
+  background: rgba(166,25,46,.06);
+  box-shadow: 0 1px 6px rgba(166,25,46,.12);
+  text-align: center;
+  margin-top: 4px;
+  display: inline-block;
+}
+.mhr-cr {
+  display: flex; align-items: center;
+  justify-content: flex-end; gap: 5px; margin-top: 3px;
+}
+.mhr-ct-lbl {
+  font-size: .5rem; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--txm); font-weight: 600;
+}
+.mhr-clock {
+  font-size: .8rem; font-weight: 500;
+  font-family: 'DM Mono', monospace !important; color: var(--tx);
+}
+.mhr-date { font-size: .66rem; font-weight: 600; color: var(--tx2); margin-top: 3px; }
+
+/* Azure identity banner */
+.az-banner {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-sub);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r-lg);
+  padding: 10px 14px; margin-bottom: 16px;
+  animation: azBannerIn .4s var(--spring) both;
+}
+@keyframes azBannerIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.az-avatar-wrap {
+  width: 38px; height: 38px; border-radius: 50%;
+  overflow: hidden; flex-shrink: 0;
+  border: 2px solid var(--bdr);
+  background: rgba(166,25,46,.08);
+}
+.az-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.az-initials {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 13px; font-weight: 700; color: var(--red);
+}
+.az-info { flex: 1; min-width: 0; }
+.az-name {
+  font-size: .82rem; font-weight: 700; color: var(--tx);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.az-pid {
+  font-family: 'DM Mono', monospace !important;
+  font-size: .66rem; color: var(--txm);
+  letter-spacing: .5px; margin-top: 2px;
+}
+.az-verified {
+  display: flex; align-items: center; gap: 4px;
+  font-family: 'DM Mono', monospace !important;
+  font-size: .62rem; font-weight: 600;
+  color: #1e7e34;
+  background: rgba(186,214,68,.12);
+  border: 1px solid rgba(186,214,68,.35);
+  border-radius: var(--r-pill);
+  padding: 3px 10px; white-space: nowrap; flex-shrink: 0;
+}
+[data-theme="dark"] .az-verified { color: #BAD644; background: rgba(186,214,68,.08); }
+
+/* ================================================================
+   11. INPUTS — v09 production aligned
+================================================================ */
+.inp-wrap { position: relative; margin-bottom: 10px; }
+
+input[type="text"] {
+  width: 100%; padding: 13px 14px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--bdr);
+  background: var(--bg-in); color: var(--tx);
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: .92rem;
+  outline: none; -webkit-appearance: none; margin: 0;
+  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+  display: block;
+}
+input[type="text"]:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(245,130,32,.12);
+}
+input[type="text"]::placeholder { color: var(--txm); }
+.err-msg { font-size: .68rem; color: var(--red); padding: 3px 2px 0; display: none; }
+
+/* ================================================================
+   12. AUTOCOMPLETE + CHIPS
+================================================================ */
+.ac-drop {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--bg-solid); border: 1px solid var(--bdr);
+  border-radius: var(--r-md); box-shadow: var(--sh-md);
+  z-index: 300; max-height: 160px; overflow-y: auto; display: none;
+}
+.ac-drop.open { display: block; }
+.ac-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 10px 12px; font-size: .84rem; color: var(--tx);
+  cursor: pointer; transition: background var(--t);
+}
+.ac-item:hover { background: var(--chip-bg); }
+
+.chips-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.chip {
+  display: inline-flex !important; align-items: center; gap: 4px;
+  padding: 5px 12px !important; border-radius: var(--r-pill) !important;
+  font-size: .7rem !important; font-weight: 500;
+  background: var(--chip-bg) !important;
+  color: var(--chip-tx) !important;
+  border: 1px solid var(--chip-bdr) !important;
+  cursor: pointer; width: auto !important; margin: 0 !important;
+  max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  transition: all var(--t) var(--ease) !important;
+  font-family: 'DM Sans', sans-serif !important;
+}
+.chip:hover {
+  background: var(--red) !important;
+  color: #fff !important;
+  border-color: var(--red) !important;
+}
+
+/* ================================================================
+   13. BUTTONS — v09 production aligned, all centered
+================================================================ */
+.btn-full {
+  display: block; width: 100%;
+  padding: 14px 20px;
+  border-radius: var(--r-md); border: none;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: .94rem; font-weight: 700;
+  cursor: pointer; text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: all var(--t) var(--ease);
+  letter-spacing: .02em;
+  margin: 0 !important;
+  line-height: 1.3;
+}
+.btn-full + .btn-full { margin-top: 8px !important; }
+.btn-full:active   { transform: scale(.98); }
+.btn-full:disabled { opacity: .36; cursor: not-allowed; transform: none !important; }
+
+.btn-red { background: var(--red); color: #fff; box-shadow: 0 4px 14px rgba(166,25,46,.28); }
+.btn-red:not(:disabled):hover { background: var(--red-dk); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(166,25,46,.38); }
+
+.btn-ora { background: var(--grad); color: #fff; box-shadow: 0 4px 14px rgba(245,130,32,.28); }
+.btn-ora:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(245,130,32,.38); }
+
+.btn-cri { background: #dc2626; color: #fff; box-shadow: 0 4px 14px rgba(220,38,38,.22); }
+.btn-cri:not(:disabled):hover { background: #b91c1c; transform: translateY(-1px); }
+
+.btn-grn { background: linear-gradient(135deg,#15803d,#22c55e); color: #fff; box-shadow: 0 4px 14px rgba(34,197,94,.28); }
+.btn-grn:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(34,197,94,.38); }
+
+.btn-edit {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  flex: 1; min-width: 110px; padding: 11px 16px;
+  border-radius: var(--pill);
+  border: 1.5px solid var(--bdr2);
+  background: var(--bg-solid); color: var(--tx);
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: .82rem; font-weight: 600;
+  cursor: pointer; width: auto !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  transition: all var(--t) var(--ease);
+}
+.btn-edit:hover {
+  border-color: var(--orange); color: var(--orange);
+  background: rgba(245,130,32,.07);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245,130,32,.15);
+}
+.btn-edit:active { transform: scale(.97); }
+[data-theme="dark"] .btn-edit { background: var(--bg-sub); border-color: var(--bdr2); }
+
+/* ================================================================
+   14. STATUS CARD
+================================================================ */
+.status-card { display: flex; gap: 10px; margin-bottom: 16px; }
+.sc-col {
+  flex: 1; border-radius: var(--r-lg);
+  padding: 16px 14px; text-align: center;
+  border: 1.5px solid transparent;
+}
+.col-dur { background: rgba(245,130,32,.09); border-color: rgba(245,130,32,.28); }
+.col-in  { background: rgba(166,25,46,.07);  border-color: rgba(166,25,46,.22); }
+[data-theme="dark"] .col-dur { background: rgba(245,130,32,.15); border-color: rgba(245,130,32,.38); }
+[data-theme="dark"] .col-in  { background: rgba(166,25,46,.16);  border-color: rgba(166,25,46,.32); }
+
+.sc-lbl  { font-size: .65rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--txm); margin-bottom: 8px; }
+.dur-val { font-size: 1.7rem; font-weight: 700; color: var(--orange); font-family: 'DM Mono', monospace !important; letter-spacing: -.02em; line-height: 1; }
+.sc-val  { font-size: 1.05rem; font-weight: 700; color: var(--tx); font-family: 'DM Mono', monospace !important; }
+.sc-loc  {
+  display: inline-block; margin-top: 5px;
+  background: rgba(166,25,46,.10); border: 1px solid rgba(166,25,46,.20);
+  border-radius: var(--r-pill); padding: 2px 10px;
+  font-size: .63rem; font-weight: 600; color: var(--red);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+[data-theme="dark"] .sc-loc { background: rgba(245,130,32,.12); border-color: rgba(245,130,32,.28); color: var(--orange); }
+
+/* ================================================================
+   15. SVG CLOCK HANDS + INLINE LOADER
+================================================================ */
+.hand-h, .hand-m, .hand-s {
+  transform-origin: 36px 36px;
+  transition: transform .9s cubic-bezier(.45,.05,.55,.95);
+}
+.hand-s { transition-duration: .5s !important; }
+
+#inline-loader { text-align: center; padding: 14px 0 6px; }
+.ld-txt { font-size: .76rem; font-weight: 500; font-style: italic; color: var(--tx2); animation: ldPulse 2s ease infinite; }
+@keyframes ldPulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+/* ================================================================
+   16. GHOST SKELETON
+================================================================ */
+.skel {
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--sk-a) 25%, var(--sk-b) 50%, var(--sk-a) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.7s ease infinite;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.sl { height: 12px; margin-bottom: 9px; }
+.sb { height: 52px; width: 100%; border-radius: var(--r-md); margin-bottom: 10px; }
+.sw30 { width: 30%; } .sw60 { width: 60%; } .sw85 { width: 85%; }
+.ghost-note { font-size: .73rem; font-style: italic; color: var(--txm); text-align: center; padding: 9px 0; animation: ldPulse 2s ease infinite; }
+
+/* ================================================================
+   17. REVIEW CARD — v09 aligned
+================================================================ */
+.review-card {
+  background: var(--bg-sub); border: 1px solid var(--bdr);
+  border-radius: var(--r-lg); padding: 20px 18px; margin-bottom: 16px;
+}
+.rv-hdr   { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txm); margin-bottom: 16px; text-align: center; }
+.rv-row   { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--bdr); }
+.rv-row:last-of-type { border-bottom: none; }
+.rdot     { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.dot-in   { background: var(--orange); }
+.dot-out  { background: var(--red); }
+.dot-dur  { background: #22c55e; }
+.rv-det   { flex: 1; }
+.rv-lbl   { font-size: .65rem; text-transform: uppercase; letter-spacing: .07em; color: var(--txm); font-weight: 600; }
+.rv-time  { font-size: 1.15rem; font-weight: 700; color: var(--tx); font-family: 'DM Mono', monospace !important; margin-top: 3px; }
+.rv-place { font-size: .82rem; color: var(--tx2); margin-top: 3px; }
+.edit-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+/* ================================================================
+   18. REDO BANNER
+================================================================ */
+.redo-banner {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 12px 14px;
+  background: rgba(220,38,38,.06); border: 1px solid rgba(220,38,38,.18);
+  border-radius: var(--r-md); margin-bottom: 14px;
+}
+[data-theme="dark"] .redo-banner { background: rgba(220,38,38,.10); border-color: rgba(220,38,38,.25); }
+.redo-ico   { font-size: 1.1rem; margin-top: 1px; flex-shrink: 0; }
+.redo-title { font-size: .8rem; font-weight: 700; color: var(--red); }
+.redo-sub   { font-size: .7rem; color: var(--tx2); margin-top: 3px; line-height: 1.4; }
+.redo-prev  { font-size: .68rem; font-family: 'DM Mono', monospace !important; color: var(--txm); margin-top: 4px; }
+
+/* ================================================================
+   19. SUCCESS CARD
+================================================================ */
+.success-card { text-align: center; animation: cardUp .45s var(--ease); }
+@keyframes cardUp { from{opacity:0;transform:translateY(14px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+.tick-wrap { position: relative; width: 60px; height: 60px; margin: 0 auto 14px; }
+.halo      { position: absolute; border-radius: 50%; border: 2px solid #22c55e; animation: haloEx 2s ease infinite; }
+.halo:nth-child(1) { inset: -8px;  animation-delay: 0s; }
+.halo:nth-child(2) { inset: -18px; animation-delay: .65s; }
+.halo:nth-child(3) { inset: -28px; animation-delay: 1.3s; }
+@keyframes haloEx {
+  0%  { transform: scale(.84); opacity: .75; }
+  60% { transform: scale(1.16); opacity: .2; }
+  100%{ transform: scale(.84); opacity: 0; }
+}
+.tick-solid {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: #22c55e; display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 2;
+  animation: popIn .5s var(--ease) .1s both;
+}
+@keyframes popIn { 0%{transform:scale(0);opacity:0} 65%{transform:scale(1.14)} 100%{transform:scale(1);opacity:1} }
+.tick-path { stroke-dasharray: 30; animation: drawTick .4s ease .5s both; }
+@keyframes drawTick { from{stroke-dashoffset:30;opacity:0} to{stroke-dashoffset:0;opacity:1} }
+
+.suc-lbl  { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--green); margin-bottom: 18px; }
+.suc-grid { background: var(--bg-sub); border: 1px solid rgba(34,197,94,.14); border-radius: var(--r-lg); overflow: hidden; text-align: center; }
+.sg-row   { padding: 16px 20px; text-align: center; }
+.sg-lbl   { font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--txm); margin-bottom: 6px; }
+.sg-val   { font-size: 1.15rem; font-weight: 700; color: var(--tx); font-family: 'DM Mono', monospace !important; }
+.sg-place { font-size: .8rem; color: var(--tx2); margin-top: 4px; font-weight: 500; }
+.sg-date  { font-size: .9rem; font-weight: 600; color: var(--tx2); }
+.sg-div   { height: 1px; background: var(--bdr); }
+
+/* ================================================================
+   20. FOOTER
+================================================================ */
+.smx-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin-top: 18px; padding-top: 14px;
+  border-top: 1px solid var(--bdr);
+}
+.ftr-left { display: flex; align-items: center; gap: 8px; }
+.theme-btn {
+  display: inline-flex !important; align-items: center; gap: 5px;
+  padding: 7px 13px !important; border-radius: var(--r-pill) !important;
+  background: var(--bg-sub) !important; border: 1px solid var(--bdr) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: .68rem; font-weight: 600;
+  color: var(--tx2) !important; cursor: pointer;
+  width: auto !important; margin: 0 !important; flex-shrink: 0;
+  transition: all var(--t) var(--ease) !important;
+}
+.theme-btn:hover { border-color: var(--orange) !important; color: var(--orange) !important; }
+
+.rcv-wrap { position: relative; }
+.rcv-btn {
+  display: inline-flex !important; align-items: center; justify-content: center;
+  padding: 6px 10px !important; border-radius: var(--r-pill) !important;
+  background: rgba(245,130,32,.10) !important;
+  border: 1px solid rgba(245,130,32,.30) !important;
+  color: var(--orange) !important;
+  font-size: .9rem; font-weight: 700; cursor: pointer;
+  width: auto !important; margin: 0 !important;
+  transition: all .2s ease !important;
+}
+.rcv-btn:hover { background: rgba(245,130,32,.22) !important; transform: scale(1.08); }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.rcv-spin { animation: spin 1.5s linear infinite; }
+.rcv-tip {
+  position: absolute; bottom: calc(100% + 7px); left: 0;
+  background: rgba(28,28,50,.92); color: #fff;
+  font-size: .62rem; font-weight: 500;
+  font-family: 'DM Sans', sans-serif !important;
+  padding: 5px 11px; border-radius: var(--r-pill);
+  white-space: nowrap; box-shadow: var(--sh-md);
+  animation: rcvTipIn .22s ease forwards;
+}
+@keyframes rcvTipIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.ftr-disc { font-size: .57rem; color: var(--txm); line-height: 1.4; text-align: right; flex: 1; }
+
+/* ================================================================
+   21. UTILITY
+================================================================ */
+.hidden { display: none !important; }
+.mt8    { margin-top: 8px; }
+.mt12   { margin-top: 12px; }
+
+/* Section spacing */
+#ci-grp, #co-grp {
+  display: flex; flex-direction: column; gap: 0;
+}
+#ci-grp .btn-full, #co-grp .btn-full {
+  margin-top: 12px !important;
+}
+
+/* ================================================================
+   v09 UI POLISH — Prasidha Jagtap
+   Explicit contrast ensures all text visible in both themes.
+================================================================ */
+
+/* Auth screen readability */
+.auth-title { font-size: 1.2rem !important; }
+#daily-greet { font-size: .84rem !important; font-weight: 600 !important; }
+.mod-name { font-size: .9rem !important; }
+
+/* Ensure input text always visible */
+[data-theme="dark"] input[type="text"] { color: #f0f2f8 !important; }
+[data-theme="light"] input[type="text"] { color: #1a1a2e !important; }
+
+/* Az-banner in header — now minimal, just shows badge */
+.az-banner {
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+
+/* Location chip bigger */
+.chip {
+  font-size: .76rem !important;
+  padding: 6px 14px !important;
+}
+
+/* Footer disc text visible in both modes */
+[data-theme="light"] .ftr-disc { color: var(--tx2) !important; }
+[data-theme="dark"]  .ftr-disc { color: var(--txm) !important; }
+
+/* Success card green tick bigger */
+.suc-lbl { font-size: .8rem !important; margin-bottom: 22px !important; }
+
+/* Clock in / clock out buttons bigger */
+#btn-ci, #btn-co {
+  font-size: 1rem !important;
+  padding: 15px 20px !important;
+  letter-spacing: .03em;
+}
+
+/* Status card location badge text larger */
+.sc-loc { font-size: .72rem !important; padding: 3px 12px !important; }
+
+/* Error messages always red in both modes */
+.err-msg { color: var(--red) !important; font-size: .74rem !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   v10 — TWO-BUTTON USER FLOW (Prasidha Jagtap)
+   Hero shift timer · clock-in / clock-out punch blocks ·
+   small Record/Update buttons · save reminder note.
+   Uses existing theme tokens — works in light and dark.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Hero: current shift timer is the focus */
+.shift-hero {
+  text-align: center;
+  padding: 14px 12px 16px;
+  margin-bottom: 16px;
+  background: var(--bg-sub);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r-lg);
+}
+.shift-hero .sh-lbl {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: .72rem; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--txm); margin-bottom: 6px;
+}
+.shift-hero .sh-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--txm); flex-shrink: 0;
+}
+.shift-hero .sh-dot.live {
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgba(22,163,74,.5);
+  animation: shPulse 1.6s ease-out infinite;
+}
+@keyframes shPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(22,163,74,.45); }
+  70%  { box-shadow: 0 0 0 9px rgba(22,163,74,0); }
+  100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+}
+.shift-hero .dur-val {
+  font-size: 2.7rem !important;
+  font-weight: 700;
+  color: var(--orange);
+  font-family: 'DM Mono', monospace !important;
+  letter-spacing: -.01em; line-height: 1;
+}
+
+/* Punch blocks — clock in (red/orange) and clock out (green-ish accent) */
+.punch {
+  position: relative;
+  background: var(--bg-sub);
+  border: 1px solid var(--bdr);
+  border-left: 4px solid var(--txm);
+  border-radius: var(--r-md);
+  padding: 12px 14px 14px;
+  margin-bottom: 12px;
+}
+.punch-in  { border-left-color: var(--red); }
+.punch-out { border-left-color: var(--green); }
+
+.punch-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 10px; margin-bottom: 10px;
+}
+.punch-title {
+  font-size: .8rem; font-weight: 700; letter-spacing: .02em;
+  text-transform: uppercase; color: var(--tx); padding-top: 2px;
+}
+.punch-in  .punch-title { color: var(--red); }
+.punch-out .punch-title { color: var(--green); }
+.punch-rec { text-align: right; min-width: 0; }
+.punch-time {
+  font-size: 1.5rem; font-weight: 700; line-height: 1.05;
+  color: var(--tx); font-family: 'DM Mono', monospace !important;
+}
+.punch-loc {
+  font-size: .68rem; font-weight: 600; color: var(--txm);
+  margin-top: 2px; max-width: 190px; margin-left: auto;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Small record / update buttons (one per block) */
+.btn-rec {
+  width: 100%;
+  padding: 11px 12px;
+  border: none; border-radius: var(--r-sm);
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: .82rem; font-weight: 700; letter-spacing: .01em;
+  color: #fff; cursor: pointer;
+  transition: transform .12s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.btn-rec:active   { transform: scale(.98); }
+.btn-rec:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.btn-rec-in  { background: var(--red);   box-shadow: 0 3px 11px rgba(166,25,46,.26); }
+.btn-rec-in:not(:disabled):hover  { background: var(--red-dk); transform: translateY(-1px); }
+.btn-rec-out { background: var(--green); box-shadow: 0 3px 11px rgba(22,163,74,.26); }
+.btn-rec-out:not(:disabled):hover { filter: brightness(1.06); transform: translateY(-1px); }
+
+/* Save reminder under the submit button */
+.save-note {
+  font-size: .68rem; line-height: 1.5; color: var(--txm);
+  text-align: center; margin: 8px 2px 4px;
+}
+.save-note b { color: var(--tx); font-weight: 700; }
+
+/* Small-screen tightening */
+@media (max-width: 360px) {
+  .shift-hero .dur-val { font-size: 2.3rem !important; }
+  .punch-time { font-size: 1.3rem; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   v11 — MULTI-SCREEN FLOW (Seamex logo palette only)
+   red #A6192E · orange #F58220 · yellow #FFCB05
+   welcome · active main · capture window · summary
+   ══════════════════════════════════════════════════════════════ */
+
+/* Soft entrance for every screen (loader plays over the top) */
+.smx-card > section:not(.hidden) { animation: secIn .36s var(--ease, ease) both; }
+@keyframes secIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Brand-only override of the live dot (no green) */
+.shift-hero .sh-dot.live { background: var(--orange); box-shadow: 0 0 0 0 rgba(245,130,32,.5); animation: shPulse 1.6s ease-out infinite; }
+@keyframes shPulse { 0% { box-shadow: 0 0 0 0 rgba(245,130,32,.5); } 70% { box-shadow: 0 0 0 9px rgba(245,130,32,0); } 100% { box-shadow: 0 0 0 0 rgba(245,130,32,0); } }
+
+/* ── WELCOME ─────────────────────────────────────────────── */
+.wel { text-align: center; padding: 14px 6px 4px; }
+.wel-logo { height: 30px; width: auto; margin: 0 auto 26px; display: block; }
+.wel-ring {
+  width: 108px; height: 108px; border-radius: 50%; margin: 0 auto 16px;
+  padding: 3px; background: var(--grad);
+}
+.wel-photo, .wel-ring > .wel-initials {
+  width: 100%; height: 100%; border-radius: 50%;
+  object-fit: cover; display: block;
+  border: 3px solid var(--bg-card);
+}
+.wel-initials {
+  align-items: center; justify-content: center; display: none;
+  background: var(--bg-sub); color: var(--orange);
+  font-size: 2rem; font-weight: 700; font-family: 'DM Mono', monospace !important;
+}
+.wel-name { font-size: 1.25rem; font-weight: 700; color: var(--tx); }
+.wel-id { font-size: .82rem; color: var(--txm); font-family: 'DM Mono', monospace !important; margin-top: 3px; }
+.wel-verified { display: inline-flex; margin-top: 9px; }
+.wel-q { font-size: .85rem; color: var(--tx2); margin: 24px 0 14px; }
+
+.btn-act {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 17px; border: none; border-radius: var(--r-md); cursor: pointer;
+  font-family: 'DM Sans', sans-serif !important; font-size: 1.05rem; font-weight: 700;
+  color: #fff; letter-spacing: .01em; transition: transform .12s ease, box-shadow .2s ease;
+}
+.btn-act + .btn-act { margin-top: 12px; }
+.btn-act:active { transform: scale(.985); }
+.btn-act .ba-ic { width: 22px; height: 22px; flex-shrink: 0; }
+.btn-act-in  { background: var(--orange); box-shadow: 0 5px 16px rgba(245,130,32,.30); }
+.btn-act-out { background: var(--red);    box-shadow: 0 5px 16px rgba(166,25,46,.28); }
+.btn-act-in:hover, .btn-act-out:hover { transform: translateY(-1px); }
+
+/* ── ACTIVE MAIN: row buttons ────────────────────────────── */
+.row-btn {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 13px 15px; margin-bottom: 11px; cursor: pointer; text-align: left;
+  background: var(--bg-sub); border: 1px solid var(--bdr);
+  border-left: 4px solid var(--txm); border-radius: var(--r-md);
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.row-btn:active { transform: scale(.99); }
+.row-in  { border-left-color: var(--orange); }
+.row-out { border-left-color: var(--red); }
+.rb-left { display: flex; align-items: center; gap: 9px; font-size: 1rem; font-weight: 700; }
+.row-in  .rb-left { color: var(--orange); }
+.row-out .rb-left { color: var(--red); }
+.rb-ic { width: 20px; height: 20px; flex-shrink: 0; }
+.rb-right { text-align: right; min-width: 0; }
+.rb-time { display: block; font-family: 'DM Mono', monospace !important; font-size: 1.15rem; font-weight: 700; color: var(--tx); line-height: 1.1; }
+.rb-loc  { display: block; font-size: .66rem; font-weight: 600; color: var(--txm); margin-top: 1px; max-width: 165px; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Submit — brand gradient */
+.btn-submit-brand { background: var(--grad) !important; color: #fff !important; box-shadow: 0 5px 16px rgba(245,130,32,.30); margin-top: 4px !important; }
+.btn-submit-brand:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 7px 20px rgba(245,130,32,.4); }
+
+/* Header right: logo + clock stack */
+.mhr { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.mhr .logo-sm { height: 20px; width: auto; }
+.mhr .mhr-clock { font-size: .82rem !important; font-weight: 700; color: var(--tx); font-family: 'DM Mono', monospace !important; }
+.mhr .mhr-date { font-size: .62rem; color: var(--txm); }
+
+/* ── CAPTURE WINDOW ──────────────────────────────────────── */
+.cap-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cap-title { font-size: 1.15rem; font-weight: 700; color: var(--tx); }
+#capture-sec.cap-in  .cap-title { color: var(--orange); }
+#capture-sec.cap-out .cap-title { color: var(--red); }
+.cap-close { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--bdr); background: var(--bg-sub); color: var(--txm); font-size: 1rem; cursor: pointer; line-height: 1; }
+.cap-note { font-size: .74rem; font-weight: 600; color: var(--red); background: rgba(166,25,46,.08); border: 1px solid rgba(166,25,46,.22); border-radius: var(--r-sm); padding: 8px 11px; margin-bottom: 14px; text-align: center; }
+
+.cap-geo { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; background: var(--bg-sub); border: 1px solid var(--bdr); border-radius: var(--r-md); padding: 18px 14px; margin-bottom: 14px; transition: background .3s ease; }
+.cap-geo-ic { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+.cap-geo.capturing { } .cap-geo.capturing .cap-geo-ic { background: rgba(245,130,32,.12); color: var(--orange); }
+.cap-geo.done .cap-geo-ic { background: rgba(245,130,32,.14); color: var(--orange); }
+.cap-geo.done.approx .cap-geo-ic { background: rgba(255,203,5,.18); color: #b8860b; }
+.cap-geo.err  .cap-geo-ic { background: rgba(166,25,46,.12); color: var(--red); }
+.cap-geo.err { cursor: pointer; }
+.cap-geo-tx { font-size: .9rem; font-weight: 700; color: var(--tx); }
+.cap-geo-sub { font-size: .7rem; color: var(--txm); font-family: 'DM Mono', monospace !important; }
+.cap-spin { animation: capSpin .9s linear infinite; }
+@keyframes capSpin { to { transform: rotate(360deg); } }
+
+.cap-time-wrap { text-align: center; margin-bottom: 16px; }
+.cap-time-lbl { font-size: .66rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--txm); margin-bottom: 2px; }
+.cap-time { font-size: 1.9rem; font-weight: 700; color: var(--tx); font-family: 'DM Mono', monospace !important; line-height: 1; }
+.cap-lbl { display: block; font-size: .76rem; font-weight: 600; color: var(--tx2); margin-bottom: 7px; }
+
+.btn-cap { background: var(--orange) !important; color: #fff !important; box-shadow: 0 4px 14px rgba(245,130,32,.28); }
+#capture-sec.cap-out .btn-cap { background: var(--red) !important; box-shadow: 0 4px 14px rgba(166,25,46,.26); }
+.btn-cap:not(:disabled):hover { transform: translateY(-1px); }
+.cap-cancel { display: block; width: 100%; margin-top: 10px; padding: 10px; background: none; border: none; color: var(--txm); font-family: 'DM Sans', sans-serif !important; font-size: .85rem; font-weight: 600; cursor: pointer; }
+.cap-cancel:hover { color: var(--tx); }
+
+/* v11 — "Update" pill on a row once a time is recorded */
+.row-btn .rb-left { position: relative; }
+.row-btn.editable .rb-left::after {
+  content: "Update";
+  margin-left: 8px;
+  font-size: .56rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; line-height: 1.4;
+  vertical-align: 2px;
+}
+.row-in.editable  .rb-left::after { background: rgba(245,130,32,.13); }
+.row-out.editable .rb-left::after { background: rgba(166,25,46,.13); }
+/* When editable, the location line doubles as a hint */
+.row-btn.editable .rb-loc::before { content: "✎ "; }
+
+  </style>
 </head>
 <body onsubmit="return false;">
 
@@ -353,6 +1464,1701 @@
   </div>
 </main>
 
-<script src="script.js"></script>
+<script>
+/*
+ * ══════════════════════════════════════════════════════════════
+ *  SEAMEX GEO-ATTENDANCE  |  inlined     |  v11 — SharePoint Production Build (single-file, no external assets)
+ *  Author : Prasidha Jagtap
+ *  Role   : Assistant Manager – IT, Aditya Birla Group (Seamex)
+ *  Office : Reliable Tech Park, Airoli, Maharashtra
+ *  Deploy : https://www.onehruat.poornata.com/Pages/logintext.aspx
+ *
+ *  Hello, future developer. 👋
+ *  Maintained by Prasidha Jagtap. Test on real Android + iOS.
+ *
+ *  WHAT CHANGED IN v08 vs v07
+ *  ─────────────────────────────────────────────────────────────
+ *  · #auth-sec manual login REPLACED by Azure AD hidden-field detection.
+ *  · azureDetect() polls DOM for ctl00_ctl53_hdnPoornataId,
+ *    ctl00_ctl53_hdnName, ctl00_ctl53_hdnCurrentUserEmail,
+ *    ctl00_ctl53_hdnPictureUrl — all confirmed on logintext.aspx.
+ *  · U.name and U.id populated from Azure ADFS session automatically.
+ *  · U.photo added to state for identity banner display.
+ *  · Identity banner rendered in main-sec header (photo + name + PID).
+ *  · Manual fallback retained: if detection fails after 6s, user
+ *    can enter PID manually (name sourced from email prefix).
+ *  · All GPS, clock-in, clock-out, review, submit logic: UNCHANGED.
+ *  · Supabase payload: UNCHANGED — user_name and employee_id now
+ *    sourced from Azure ADFS instead of manual input.
+ *
+ *  FUNCTION INDEX
+ *  ─────────────────────────────────────────────────────────────
+ *  INIT          DOMContentLoaded
+ *  AZURE DETECT  azureDetect() · azureApply() · azureFallback()   ← NEW v08
+ *  AMBIENT       setTimeOfDay()
+ *  THEME         applyTheme() · cycleTheme() · isDay()
+ *  CLOCK LOOP    startMainLoop() · stopMainLoop()
+ *  SVG HANDS     tickHands() · startHandLoop() · stopHandLoop() · rot()
+ *  TRANSITIONS   pageTransition()
+ *  VALIDATION    isValidName · isValidId · isValidLoc · sanitize
+ *  RENDER MAIN   renderMain() · renderAzureBanner()               ← UPDATED v08
+ *  CLOCK IN      btn-ci listener
+ *  CLOCK OUT     btn-co listener  ← GPS freeze fixed here (FIX-05)
+ *  RENDER REVIEW renderReview()
+ *  MODAL         showModal() · closeModal()
+ *  FIX CLOCK-IN  promptFixIn()
+ *  REDO OUT      promptRedoOut() · showRedoBanner()
+ *  SUBMIT        btn-submit listener
+ *  SUCCESS       renderSuccess()
+ *  RECOVERY      markBusy() · clearBusy() · recoverState()
+ *  GPS           getCoords()   ← Promise.race fix lives here (FIX-05)
+ *  LOCATION CACHE getCached() · saveLoc() · renderChips() · setupAC() · renderDrop()
+ *  TOAST         toast()
+ *  HELPERS       g · setTx · hide · show · nowISO · rnd · save · isNewDay · fmt · msDur · duration
+ *
+ *  SECURITY NOTES (Prasidha)
+ *  ─────────────────────────────────────────────────────────────
+ *  · Azure hidden fields: same-origin DOM read. No credentials transmitted.
+ *  · PID validated as numeric-only. Name validated letters+spaces.
+ *  · isValidName/isValidId/isValidLoc — strict regex on every input.
+ *  · sanitize() — strips SQL/XSS chars before every DB write.
+ *  · All DOM writes via .textContent — never .innerHTML (XSS).
+ *  · Supabase anon key is public. Safe ONLY with RLS enabled.
+ *  · GPS maximumAge:0 — always fresh, never cached position.
+ *  · localStorage shape validated before trusting on restore.
+ *  · isSubmitting flag — double-submit race guard.
+ *
+ *  BUG FIXES (all retained from v07)
+ *  ─────────────────────────────────────────────────────────────
+ *  FIX-01  renderMain() enforces section visibility on every call.
+ *  FIX-02  Single rAF loop drives header clock + shift timer.
+ *  FIX-03  Redo flow fully resets U.clockOut, lastActionDate, btn text.
+ *  FIX-04  Ghost screen fully hidden + co-grp restored on GPS fail.
+ *  FIX-05  GPS freeze fix: getCoords() uses true Promise.race.
+ *  FIX-06  Recovery button: appears after 5s stuck, DOM-only restore.
+ *
+ *  MIGRATION CHECKLIST
+ *  ─────────────────────────────────────────────────────────────
+ *  [x] Azure AD SSO: DONE. azureDetect() reads ADFS hidden fields.
+ *  [ ] GitHub Pages→SharePoint SPFx: bundle supabase locally.
+ *      Change submitted_via to 'sharepoint' in payload.
+ *  [ ] DB→Production: swap SUPABASE_URL + SUPABASE_KEY only.
+ *  [ ] Multi-office: uncomment branch_code in payload.
+ * ══════════════════════════════════════════════════════════════
+ */
+
+/* ── SUPABASE ────────────────────────────────────────────────
+   Prasidha: Anon key is safe ONLY while RLS is active on 'attendance'.
+   Policy: INSERT for anon. SELECT/UPDATE/DELETE: DENY.
+   Rotate key immediately if RLS is ever disabled.
+────────────────────────────────────────────────────────────── */
+const SUPABASE_URL = 'https://svhbqvcabbzrxvndxtjm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2aGJxdmNhYmJ6cnh2bmR4dGptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTA0MjksImV4cCI6MjA5MDc4NjQyOX0.lYIsM5zN4uGKbP79avcKR_EaAlP5tu2N688OgZI6wZA';
+const _db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ── STATE ───────────────────────────────────────────────────
+   Prasidha: U is the single source of truth.
+   Every change calls save() to mirror to localStorage.
+   Shape validated on restore — tampered data cannot bypass auth.
+────────────────────────────────────────────────────────────── */
+let U = {
+  name: '', id: '', photo: '',           /* photo added v08 — Azure profile pic URL */
+  /* Business fields — v09: read from SP hidden fields, saved to Supabase (Prasidha Jagtap) */
+  businessName: '',   /* hdnBusinessName  e.g. "BMC01"                  */
+  businessUnit: '',   /* hdnBusinessUnit  e.g. "SEA01"                  */
+  businessDesc: '',   /* hdnBusinessDesc  e.g. "Birla Mgmt Centre Svcs" */
+  buUnitDesc:   '',   /* hdnBuUnitDesc    e.g. "Seamex"                 */
+  clockIn: null,  clockInCoords: '',  clockInLoc: '',
+  clockOut: null, clockOutCoords: '', clockOutLoc: '',
+  isClockedIn: false, submitted: false, lastActionDate: null,
+  clockInCoordSource:  'gps',  /* 'gps' | 'ip' — set by getCoords() */
+  clockOutCoordSource: 'gps'   /* tracked per-event, stored in payload */
+};
+
+let rafId        = null;  // requestAnimationFrame loop ID
+let handIv       = null;  // setInterval ID for auth clock hands
+let isSubmitting = false; // double-submit guard
+let inRedoMode   = false; // true when user is redoing clock-out
+let stuckTimer   = null;  // setTimeout ID for stuck-button detector
+
+/* ── STORAGE KEYS ────────────────────────────────────────────
+   Using smx_v06 key for backward compatibility so active shifts
+   from v06 survive the upgrade. Change key only on schema break.
+────────────────────────────────────────────────────────────── */
+const KEY_USER    = 'smx_v06';
+const KEY_PENDING = 'smx_pending';   /* v10: yesterday's unsubmitted shift held for next-day submit */
+const KEY_ID      = 'smx_lastid';
+const KEY_THEME   = 'smx_theme';
+const KEY_LOCS    = 'smx_locs';
+const MAX_LOCS    = 6;
+
+/* ── HELPERS (hoisted) ───────────────────────────────────────
+   Prasidha: Declared as `function` so they are fully hoisted.
+   `const` arrow functions are NOT hoisted — using them above
+   their declaration throws ReferenceError (temporal dead zone).
+   Keep these as `function` declarations. Do not convert to const.
+────────────────────────────────────────────────────────────── */
+
+/** g — Prasidha: shorthand getElementById, used everywhere */
+function g(id) { return document.getElementById(id); }
+
+/** setTx — Prasidha: safely sets textContent, no-ops if element missing */
+function setTx(id, v) { const e = g(id); if (e) e.textContent = v; }
+
+/** hide — Prasidha: adds .hidden class (display:none!important in CSS) */
+function hide(id) { g(id)?.classList.add('hidden'); }
+
+/** show — Prasidha: removes .hidden class */
+function show(id) { g(id)?.classList.remove('hidden'); }
+
+/** nowISO — Prasidha: current timestamp as ISO 8601 string */
+function nowISO() { return new Date().toISOString(); }
+
+/** rnd — Prasidha: random element from array */
+function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+/** save — Prasidha: serializes U state to localStorage */
+function save() { localStorage.setItem(KEY_USER, JSON.stringify(U)); }
+
+/* ── CONTENT ARRAYS ──────────────────────────────────────────
+   Prasidha: All UI copy here. Edit freely without touching logic.
+────────────────────────────────────────────────────────────── */
+const GREETINGS = [
+  'Rare Sunday warrior spotted. Respect. 🦁',
+  'New week, fresh resolve. Make it count! 🌟',
+  'Tuesday energy — steady and purposeful. 💪',
+  'Midweek momentum. You are in the thick of it. ⚡',
+  'Thursday: the unsung hero of the week.',
+  'Friday vibes. Finish line is right there. 🎉',
+  'Closing the week strong. That is the Seamex way. 🚀'
+];
+const GHOST_NOTES = [
+  'Your timings are being stored, safe and sound.',
+  'Attendance logged with care — just like clockwork.',
+  'Professional work happening behind the scenes.',
+  'The database is receiving your day\'s hard work.',
+  'Shift data is making its way in. Hang tight.'
+];
+const LOADER_MSGS = [
+  'Starting your day…', 'One moment please…',
+  'Getting things ready…', 'Just a tick…'
+];
+
+/* ══════════════════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════════════════
+   Prasidha: Order matters.
+   1. Ambient time-of-day (CSS attr, no runtime cost after this)
+   2. Saved theme (prevents flash of wrong theme)
+   3. Daily greeting (day-of-week from GREETINGS)
+   4. Pre-fill last Poornata ID (reduce login friction)
+   5. Session restore OR fresh auth setup
+   6. setupAC called ONCE here — not on every renderMain call
+      (calling it multiple times stacks document.click listeners)
+*/
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeOfDay();
+
+  const savedTheme = localStorage.getItem(KEY_THEME) || 'auto';
+  _themeMode = savedTheme;
+  applyTheme(_themeMode);
+
+  setTx('daily-greet', GREETINGS[new Date().getDay()]);
+
+  setupAC('cap-loc', 'cap-drop', 'cap-chips');
+
+  /* Tap the location box to retry when GPS failed (v11) */
+  const capGeo = g('cap-geo');
+  if (capGeo) capGeo.addEventListener('click', () => {
+    if (capGeo.classList.contains('err')) startGeoCapture();
+  });
+
+  /* ── Session restore (Prasidha v08) ─────────────────────────────────────
+     Validate shape before trusting. If valid same-day session exists,
+     skip Azure detection and go straight to renderMain().
+     Session carries U.name + U.id already resolved from Azure in prior load.
+  */
+  /* ── Session restore (v10 — two-button + next-day catch-up) ──────────
+     Rules:
+       · Same calendar day, not submitted        → resume today's shift.
+       · Previous day, not submitted, has a punch → hold it as PENDING,
+         start a fresh day (identity carried), prompt to submit it.
+       · Submitted, or empty previous day         → discard, start fresh.
+     The PENDING shift is stored under its own key so it survives even if
+     the user closes the app before deciding. It is offered again on the
+     next open until submitted or explicitly discarded.
+  */
+  try {
+    const raw = localStorage.getItem(KEY_USER);
+    if (raw) {
+      const p = JSON.parse(raw);
+      const idOK = p?.name && typeof p.name === 'string' &&
+                   p?.id   && typeof p.id   === 'string';
+
+      if (idOK && !isNewDay(p.lastActionDate)) {
+        /* Same day — resume exactly where they left off */
+        U = p;
+        renderRoot();
+        return;
+      }
+
+      if (idOK && !p.submitted && isNewDay(p.lastActionDate) && (p.clockIn || p.clockOut)) {
+        /* Previous day, never submitted — hold it and start fresh */
+        localStorage.setItem(KEY_PENDING, JSON.stringify(p));
+        U = freshDay(p);
+        save();
+        renderRoot();         /* checkPending() inside will raise the prompt */
+        return;
+      }
+
+      if (idOK) {
+        /* Submitted yesterday, or an empty previous day — clean start, keep identity */
+        U = freshDay(p);
+        save();
+        renderRoot();
+        return;
+      }
+
+      localStorage.removeItem(KEY_USER);
+    }
+  } catch { localStorage.removeItem(KEY_USER); }
+
+  /* ── Fresh session: run Azure detection ─────────────────────────────── */
+  azureDetect();
+});
+
+/* ══════════════════════════════════════════════════════════════
+   AZURE AD DETECTION — v08 (Prasidha Jagtap)
+
+   Replaces the manual #auth-sec login form from v07.
+   Reads identity directly from Classic SharePoint hidden fields
+   written by Azure ADFS after login on logintext.aspx.
+
+   CONFIRMED FIELD IDs (from logintext.aspx page source):
+     ctl00_ctl53_hdnPoornataId       → U.id   (numeric, e.g. "446686")
+     ctl00_ctl53_hdnName             → U.name (e.g. "Prasidha Jagtap")
+     ctl00_ctl53_hdnCurrentUserEmail → email  (e.g. "prasidha.jagtap@adityabirla.com")
+     ctl00_ctl53_hdnPictureUrl       → photo  (URL to profile thumbnail)
+
+   STRATEGY:
+     Classic ASP.NET pages may populate hidden fields AFTER
+     DOMContentLoaded via code-behind. We poll every 400ms for
+     up to 6 seconds before falling to fallback.
+
+   SECURITY (Prasidha):
+     · Same-origin DOM read. No credentials transmitted.
+     · PID validated numeric-only before accepting.
+     · Name validated letters+spaces before accepting.
+     · Photo URL not validated — only used as img src (safe).
+
+   FUTURE MIGRATION NOTE:
+     Replace azureDetect() with MSAL.js token extraction when
+     portal moves to SPFx modern pages. Keep azureApply() call
+     signature unchanged — renderMain() and Supabase payload
+     both consume U.name + U.id with no changes needed.
+══════════════════════════════════════════════════════════════ */
+
+var _azurePollCount = 0;
+var _azurePollMax   = 15;   /* 15 × 400ms = 6 seconds max */
+var _azurePollTimer = null;
+
+/**
+ * azureDetect — Prasidha Jagtap (v08)
+ * Polls DOM for Azure ADFS hidden fields. Stops at first valid PID.
+ * Shows auth screen with detecting state while polling.
+ */
+function azureDetect() {
+  _azurePollCount = 0;
+
+  /* Show auth-sec in detecting state while we poll */
+  show('auth-sec');
+  hide('main-sec');
+  hide('auth-manual-grp');
+  show('auth-detecting');
+  setTx('auth-detect-msg', 'Connecting to Azure AD…');
+
+  _azurePollTimer = setInterval(function () {
+    _azurePollCount++;
+
+    /* ── Read all four confirmed hidden fields (Prasidha Jagtap) ─── */
+    /* ── Identity fields (Prasidha Jagtap) ── */
+    var pidEl   = document.getElementById('ctl00_ctl53_hdnPoornataId')
+               || document.querySelector('input.hdnPoornataId')
+               || document.querySelector('input[name*="hdnPoornataId"]');
+
+    var nameEl  = document.getElementById('ctl00_ctl53_hdnName')
+               || document.querySelector('input.hdnName')
+               || document.querySelector('input[name*="hdnName"]');
+
+    var emailEl = document.getElementById('ctl00_ctl53_hdnCurrentUserEmail')
+               || document.querySelector('input.hdnCurrentUserEmail')
+               || document.querySelector('input[name*="hdnCurrentUserEmail"]');
+
+    var photoEl = document.getElementById('ctl00_ctl53_hdnPictureUrl')
+               || document.querySelector('input.hdnPictureUrl')
+               || document.querySelector('input[name*="hdnPictureUrl"]');
+
+    /* ── Business fields — v09 (Prasidha Jagtap) ── */
+    /* Confirmed hidden fields on logintext.aspx / TestingText.aspx      */
+    /* hdnBusinessName → BU code e.g. "BMC01"                            */
+    /* hdnBusinessDesc → Full name e.g. "Birla Mgmt Centre Services"     */
+    /* hdnBusinessUnit → Unit code e.g. "SEA01"                          */
+    /* hdnBuUnitDesc   → Unit name e.g. "Seamex"                         */
+    var bizNameEl = document.getElementById('ctl00_ctl53_hdnBusinessName')
+               || document.querySelector('input.hdnBusinessName')
+               || document.querySelector('input[name*="hdnBusinessName"]');
+
+    var bizUnitEl = document.getElementById('ctl00_ctl53_hdnBusinessUnit')
+               || document.querySelector('input.hdnBusinessUnit')
+               || document.querySelector('input[name*="hdnBusinessUnit"]');
+
+    var bizDescEl = document.getElementById('ctl00_ctl53_hdnBusinessDesc')
+               || document.querySelector('input.hdnBusinessDesc')
+               || document.querySelector('input[name*="hdnBusinessDesc"]');
+
+    var buDescEl  = document.getElementById('ctl00_ctl53_hdnBuUnitDesc')
+               || document.querySelector('input.hdnBuUnitDesc')
+               || document.querySelector('input[name*="hdnBuUnitDesc"]');
+
+    var pid         = (pidEl     ? pidEl.value     : '').trim();
+    var name        = (nameEl    ? nameEl.value    : '').trim();
+    var email       = (emailEl   ? emailEl.value   : '').trim();
+    var photo       = (photoEl   ? photoEl.value   : '').trim();
+    var bizName     = (bizNameEl ? bizNameEl.value : '').trim();
+    var bizUnit     = (bizUnitEl ? bizUnitEl.value : '').trim();
+    var bizDesc     = (bizDescEl ? bizDescEl.value : '').trim();
+    var buDesc      = (buDescEl  ? buDescEl.value  : '').trim();
+
+    /* Derive name from email prefix if hidden name field empty */
+    if (!name && email) name = azureDeriveNameFromEmail(email);
+
+    setTx('auth-detect-msg', 'Detecting… (' + _azurePollCount + ')');
+
+    if (isValidId(pid)) {
+      clearInterval(_azurePollTimer);
+      azureApply(pid, name || 'Employee', email, photo,
+        { bizName, bizUnit, bizDesc, buDesc },
+        'Azure ADFS · Hidden Fields');
+      return;
+    }
+
+    if (_azurePollCount >= _azurePollMax) {
+      clearInterval(_azurePollTimer);
+      /* Detection exhausted — show manual PID entry fallback */
+      azureFallback(email, name);
+    }
+  }, 400);
+}
+
+/**
+ * azureApply — Prasidha Jagtap (v08)
+ * Stores resolved Azure identity into U and starts the app.
+ * Security: PID and name re-validated before accepting.
+ * @param {string} pid
+ * @param {string} name
+ * @param {string} email
+ * @param {string} photo
+ * @param {string} source
+ */
+function azureApply(pid, name, email, photo, bizFields, source) {
+  /* Handle calls without bizFields (manual fallback path) */
+  if (typeof bizFields === 'string') { source = bizFields; bizFields = {}; }
+
+  /* SECURITY: re-validate before trusting (Prasidha) */
+  if (!isValidId(pid)) {
+    toast('Identity check failed. Please enter your ID manually.', 'err');
+    azureFallback(email, name);
+    return;
+  }
+
+  /* Sanitize name — strip any injected chars (defence-in-depth) */
+  const safeName = name.trim().replace(/[^a-zA-Z\s]/g, '').trim() || 'Employee';
+
+  U.name  = safeName;
+  U.id    = pid;
+  U.photo = photo || '';
+  /* v09: business fields from SP hidden fields (Prasidha Jagtap) */
+  U.businessName = (bizFields && bizFields.bizName) || U.businessName || '';
+  U.businessUnit = (bizFields && bizFields.bizUnit) || U.businessUnit || '';
+  U.businessDesc = (bizFields && bizFields.bizDesc) || U.businessDesc || '';
+  U.buUnitDesc   = (bizFields && bizFields.buDesc)  || U.buUnitDesc   || '';
+  U.lastActionDate = nowISO();
+  localStorage.setItem(KEY_ID, pid);
+  save();
+
+  console.info('[Seamex|Prasidha v08] Azure identity resolved via:', source);
+  window.dispatchEvent(new CustomEvent('poornataIdentityReady', {
+    detail: { pid, name: safeName, email, photo, source }, bubbles: true
+  }));
+
+  /* Show brief confirmation then go to main */
+  setTx('auth-detect-msg', '✓ Verified — ' + safeName);
+  setTimeout(function () {
+    pageTransition(function () { renderRoot(); }, 'Starting your day…');
+  }, 700);
+}
+
+/**
+ * azureFallback — Prasidha Jagtap (v08)
+ * Shows manual PID entry when auto-detection fails.
+ * Name pre-filled from email prefix if available.
+ * @param {string} email
+ * @param {string} name
+ */
+function azureFallback(email, name) {
+  hide('auth-detecting');
+  show('auth-manual-grp');
+
+  /* Pre-fill name if we got it from email even without PID */
+  const nameInp = g('inp-name');
+  if (nameInp && name && !nameInp.value) nameInp.value = name;
+
+  /* Pre-fill last used PID */
+  const lastId = localStorage.getItem(KEY_ID);
+  const idInp  = g('inp-id');
+  if (idInp && lastId && !idInp.value) idInp.value = lastId;
+
+  /* Store email for later use in payload even if not displayed */
+  if (email) U._azureEmail = email;
+
+  setupLoginValidation();
+  toast('Auto-detect failed. Please enter your Poornata ID.', 'err');
+}
+
+/**
+ * azureDeriveNameFromEmail — Prasidha Jagtap (v08)
+ * e.g. "prasidha.jagtap@adityabirla.com" → "Prasidha Jagtap"
+ * @param {string} email
+ * @returns {string}
+ */
+function azureDeriveNameFromEmail(email) {
+  if (!email || !email.includes('@')) return '';
+  const prefix = email.split('@')[0];
+  if (/^\d+$/.test(prefix)) return '';
+  return prefix.replace(/[._-]/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TIME-OF-DAY AMBIENT
+   Prasidha: Sets data-tod on body. CSS handles all animation.
+   dawn(5-9am) · day(9-15) · dusk(15-18) · night(18-5)
+*/
+function setTimeOfDay() {
+  const h = new Date().getHours();
+  const tod = h >= 5  && h < 9  ? 'dawn'
+            : h >= 9  && h < 15 ? 'day'
+            : h >= 15 && h < 18 ? 'dusk'
+            : 'night';
+  document.body.setAttribute('data-tod', tod);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   THEME SYSTEM
+   Prasidha: Modes: 'auto' (time-based) | 'light' | 'dark'.
+   Preference saved to localStorage. All .t-ico and .t-lbl
+   elements across both footers updated together.
+*/
+let _themeMode = 'auto';
+
+/** applyTheme — Prasidha: resolves effective theme and updates DOM */
+function applyTheme(mode) {
+  const eff = mode === 'auto' ? (isDay() ? 'light' : 'dark') : mode;
+  document.documentElement.setAttribute('data-theme', eff);
+  const ico = eff === 'dark' ? '☀️' : '🌙';
+  const lbl = eff === 'dark' ? 'Light' : 'Dark';
+  document.querySelectorAll('.t-ico').forEach(e => e.textContent = ico);
+  document.querySelectorAll('.t-lbl').forEach(e => e.textContent = lbl);
+}
+
+/** cycleTheme — Prasidha: called by onclick on theme buttons */
+function cycleTheme() {
+  const next = { auto: 'light', light: 'dark', dark: 'auto' };
+  _themeMode = next[_themeMode] || 'auto';
+  localStorage.setItem(KEY_THEME, _themeMode);
+  applyTheme(_themeMode);
+}
+
+/** isDay — Prasidha: true between 6am and 6pm */
+const isDay = () => { const h = new Date().getHours(); return h >= 6 && h < 18; };
+
+/* ══════════════════════════════════════════════════════════════
+   MAIN RAF LOOP — FIX-02 (Prasidha)
+   Single requestAnimationFrame loop drives BOTH the live header
+   clock AND the shift timer from the same Date.now() call.
+   Zero lag, zero drift. Runs only while main-sec is visible.
+*/
+
+/** startMainLoop — Prasidha: starts unified clock + timer rAF loop */
+function startMainLoop() {
+  stopMainLoop();
+  let lastSec = -1;
+
+  function loop() {
+    const d  = new Date();
+    const sc = d.getSeconds();
+
+    if (sc !== lastSec) {
+      lastSec = sc;
+      const hh = d.getHours()  .toString().padStart(2, '0');
+      const mm = d.getMinutes().toString().padStart(2, '0');
+      const ss = sc.toString().padStart(2, '0');
+
+      setTx('hdr-clock', `${hh}:${mm}:${ss}`);
+      setTx('hdr-date', d.toLocaleDateString('en-IN', {
+        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+      }));
+
+      /* Shift timer — live only while clocked in and not yet clocked out (v10) */
+      if (U.clockIn && !U.clockOut && !U.submitted) {
+        setTx('timer-val', msDur(Date.now() - new Date(U.clockIn).getTime()));
+      }
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+  rafId = requestAnimationFrame(loop);
+}
+
+/** stopMainLoop — Prasidha: cancels the rAF loop */
+function stopMainLoop() {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SVG CLOCK HANDS
+   Prasidha: JS sets rotation angle once/second.
+   CSS cubic-bezier transition does the smooth easing (GPU-composited).
+*/
+
+/** tickHands — Prasidha: sets H/M/S SVG hand rotation angles */
+function tickHands(hId, mId, sId) {
+  const d  = new Date();
+  const sc = d.getSeconds();
+  const mn = d.getMinutes() + sc / 60;
+  const hr = (d.getHours() % 12) + mn / 60;
+  rot(hId, hr * 30);
+  rot(mId, mn * 6);
+  rot(sId, sc * 6);
+}
+
+/** startHandLoop — Prasidha: starts 1s interval for auth clock */
+function startHandLoop(hId = 'ac-h', mId = 'ac-m', sId = 'ac-s') {
+  tickHands(hId, mId, sId);
+  handIv = setInterval(() => tickHands(hId, mId, sId), 1000);
+}
+
+/** stopHandLoop — Prasidha: clears auth clock interval */
+function stopHandLoop() { clearInterval(handIv); handIv = null; }
+
+/** rot — Prasidha: applies CSS rotation to SVG element */
+function rot(id, deg) {
+  const el = g(id);
+  if (el) el.style.transform = `rotate(${deg}deg)`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE TRANSITION — CRED-style clock overlay
+   Prasidha: Full-screen overlay with ticking clock + floating
+   time emojis between screens. No dependencies.
+*/
+const PT_MSGS   = ['Switching view…', 'One moment…', 'Loading…', 'Just a tick…'];
+const PT_EMOJIS = ['⏱', '⌛', '🕐', '⏳', '🕑', '⏰'];
+
+/** pageTransition — Prasidha: shows animated overlay, runs fn() mid-fade */
+function pageTransition(fn, msg) {
+  const ov   = g('pg-tr');
+  const msgEl = g('pt-msg');
+  const parts = g('pt-parts');
+  if (!ov) { if (fn) fn(); return; }
+
+  if (msgEl) msgEl.textContent = msg || rnd(PT_MSGS);
+
+  /* Spawn floating time emojis */
+  if (parts) {
+    parts.innerHTML = '';
+    [...PT_EMOJIS].sort(() => Math.random() - .5).slice(0, 4).forEach((em, i) => {
+      const p = document.createElement('div');
+      p.className = 'pt-p';
+      p.textContent = em;
+      p.style.cssText = `left:${12 + i * 22}%;bottom:${8 + Math.random() * 18}px;animation-delay:${i * .14}s`;
+      parts.appendChild(p);
+    });
+  }
+
+  ov.classList.add('on');
+  setTimeout(() => { if (fn) fn(); }, 260);
+  setTimeout(() => ov.classList.remove('on'), 960);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INPUT VALIDATION — Prasidha
+   SECURITY: all three validators enforced consistently on every
+   input, every page, re-checked on every button click.
+
+   isValidName: letters + spaces, min 2 chars.
+   isValidId  : digits only, 3–12 chars.
+   isValidLoc : letters/digits/spaces/hyphens ONLY.
+                Blocks all SQL-injection and HTML-injection chars.
+   sanitize   : strips dangerous chars before any DB write.
+                Supabase parameterized queries are the baseline.
+                This is defence-in-depth.
+*/
+const isValidName = s => /^[a-zA-Z\s]{2,60}$/.test(s.trim());
+const isValidId   = s => /^[0-9]{3,12}$/.test(s.trim());
+
+/** isValidLoc — Prasidha: BLOCKS < > " ' ; = + # | \ / ( ) { } % @ ` */
+const isValidLoc  = s => /^[a-zA-Z0-9 \-]{2,60}$/.test(s.trim());
+
+/** sanitize — Prasidha: final strip before any DB write */
+const sanitize = s =>
+  s.trim().replace(/[<>"'`%;(){}\\\/=+|#@]/g, '').slice(0, 60);
+
+/** showErrIf — Prasidha: helper to toggle inline error visibility */
+const showErrIf = (id, cond) => {
+  const el = g(id);
+  if (el) el.style.display = cond ? 'block' : 'none';
+};
+
+/** validateLoc — Prasidha: validates location input, shows error, returns bool */
+function validateLoc(raw, errId) {
+  if (!raw.trim()) { toast('Please enter a location name.'); return false; }
+  if (!isValidLoc(raw)) {
+    showErrIf(errId, true);
+    toast('Use letters, numbers, spaces or hyphens only.', 'err'); return false;
+  }
+  showErrIf(errId, false);
+  return true;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LOGIN VALIDATION
+   Prasidha: Enables Start Day only when both fields pass.
+*/
+function setupLoginValidation() {
+  const nIn = g('inp-name'), iIn = g('inp-id'), btn = g('btn-start');
+  if (!nIn || !iIn || !btn) return;
+
+  const check = () => {
+    const n = nIn.value.trim(), i = iIn.value.trim();
+    showErrIf('err-name', n && !isValidName(n));
+    showErrIf('err-id',   i && !isValidId(i));
+    btn.disabled = !(isValidName(n) && isValidId(i));
+  };
+  nIn.addEventListener('input', check);
+  iIn.addEventListener('input', check);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   START DAY
+   Prasidha: Re-validates on click (not just on input events).
+*/
+g('btn-start').addEventListener('click', (e) => { e.preventDefault();
+  const name = g('inp-name').value.trim();
+  const id   = g('inp-id').value.trim();
+
+  /* SECURITY: Re-validate on click (Prasidha v08) */
+  if (!isValidName(name) || !isValidId(id)) {
+    toast('Check your details.', 'err'); return;
+  }
+
+  /* v08: route through azureApply so identity is stored correctly.
+     Photo will be empty in manual fallback — that is acceptable. */
+  azureApply(id, name, U._azureEmail || '', U.photo || '', 'Manual Fallback');
+});
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER MAIN — central state router
+   FIX-01 (Prasidha): enforces section visibility at every call.
+   Called from btn-start AND session restore. Both paths show
+   main-sec and hide auth-sec correctly.
+*/
+/* ══════════════════════════════════════════════════════════════
+   SCREEN ROUTER — v11
+   Sections: auth-sec · welcome-sec · main-sec · capture-sec · success-sec.
+   showSection() hides all and shows one. renderRoot() decides which.
+   In-app navigation goes through goCapture/goMain/goSuccess which wrap
+   the transition loader so an animation always plays between screens.
+*/
+const SECTIONS = ['auth-sec', 'welcome-sec', 'main-sec', 'capture-sec', 'success-sec'];
+
+function showSection(id) {
+  SECTIONS.forEach(s => { const el = g(s); if (el) el.classList.toggle('hidden', s !== id); });
+}
+
+/** setLogos — reuse the one embedded logo (from .auth-logo) everywhere */
+function setLogos() {
+  const src = document.querySelector('.auth-logo')?.src || '';
+  if (!src) return;
+  const wl = g('wel-logo'); if (wl) wl.src = src;
+  const ls = g('logo-sm');  if (ls) ls.src = src;
+}
+
+/** applyPhoto — sets profile photo, or initials fallback */
+function applyPhoto(img, initEl, photo, name) {
+  const parts = (name || 'E').trim().split(' ');
+  const initials = ((parts[0] || 'E')[0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+  if (img && photo) {
+    img.src = photo; img.style.display = 'block';
+    if (initEl) initEl.style.display = 'none';
+    img.onerror = function () {
+      img.style.display = 'none';
+      if (initEl) { initEl.textContent = initials; initEl.style.display = 'flex'; }
+    };
+  } else if (initEl) {
+    initEl.textContent = initials; initEl.style.display = 'flex';
+    if (img) img.style.display = 'none';
+  }
+}
+
+/** renderRoot — choose the right screen for the current state (no transition) */
+function renderRoot() {
+  hide('auth-sec');
+  setLogos();
+
+  if (U.submitted) {
+    showSection('success-sec');
+    renderSuccess();
+    checkPending();
+    return;
+  }
+  if (!U.clockIn && !U.clockOut) {
+    showSection('welcome-sec');
+    renderWelcome();
+    checkPending();
+    return;
+  }
+  showSection('main-sec');
+  renderMainBody();
+  checkPending();
+}
+
+/** renderWelcome — centered photo + PID + logo + two action buttons */
+function renderWelcome() {
+  stopMainLoop();
+  setLogos();
+  setTx('wel-name', U.name || '');
+  setTx('wel-id',   U.id ? ('PID ' + U.id) : '');
+  applyPhoto(g('wel-photo'), g('wel-initials'), U.photo, U.name);
+}
+
+/** renderMainBody — active shift: header + hero timer + row buttons */
+function renderMainBody() {
+  setTx('disp-name', U.name || '');
+  setTx('disp-id',   U.id ? ('PID ' + U.id) : '');
+  applyPhoto(g('mhl-photo'), g('mhl-initials'), U.photo, U.name);
+  setLogos();
+  hide('ghost-scr');
+  startMainLoop();
+  renderPunchDisplay();
+}
+
+/**
+ * renderPunchDisplay — v11
+ * Paints the row buttons (last recorded time/place) and the hero timer.
+ */
+function renderPunchDisplay() {
+  setTx('ci-time', U.clockIn  ? fmt(U.clockIn)  : '--:-- --');
+  setTx('ci-loc',  U.clockIn  ? (U.clockInLoc  + sourceTag(U.clockInCoordSource))  : 'Tap to record');
+  setTx('co-time', U.clockOut ? fmt(U.clockOut) : '--:-- --');
+  setTx('co-loc',  U.clockOut ? (U.clockOutLoc + sourceTag(U.clockOutCoordSource)) : 'Tap to record');
+
+  /* v11: show the "Update" pill once a time exists, so it's clear re-tapping edits it */
+  const rowIn  = g('btn-ci'); if (rowIn)  rowIn.classList.toggle('editable',  !!U.clockIn);
+  const rowOut = g('btn-co'); if (rowOut) rowOut.classList.toggle('editable', !!U.clockOut);
+
+  const dot = g('sh-dot'), lbl = g('sh-lbl-txt');
+  if (U.clockIn && !U.clockOut) {
+    setTx('timer-val', msDur(Date.now() - new Date(U.clockIn).getTime()));
+    if (lbl) lbl.textContent = 'Current shift';
+    if (dot) dot.classList.add('live');
+  } else if (U.clockIn && U.clockOut) {
+    setTx('timer-val', duration(U.clockIn, U.clockOut));
+    if (lbl) lbl.textContent = 'Shift complete';
+    if (dot) dot.classList.remove('live');
+  } else if (!U.clockIn && U.clockOut) {
+    setTx('timer-val', '--:--:--');
+    if (lbl) lbl.textContent = 'Clock-in missing';
+    if (dot) dot.classList.remove('live');
+  } else {
+    setTx('timer-val', '00:00:00');
+    if (lbl) lbl.textContent = 'Not started';
+    if (dot) dot.classList.remove('live');
+  }
+}
+
+/** sourceTag — appends a note when location came from network (IP) not GPS */
+function sourceTag(src) { return src === 'ip' ? '  ·  approx (network)' : ''; }
+
+/**
+ * renderAzureBanner — Prasidha Jagtap (v08)
+ * Renders the Azure identity strip at the top of main-sec.
+ * Shows profile photo (or initials), name, PID, and verified badge.
+ * Called on every renderMain() — safe to call multiple times.
+ * Security: all writes via textContent. Photo via img.src only.
+ */
+function renderAzureBanner() {
+  const banner = g('azure-banner');
+  if (!banner) return;
+
+  /* Photo or initials in az-banner (Prasidha) */
+  const img  = g('az-photo');
+  const init = g('az-initials');
+
+  if (img && U.photo) {
+    img.src = U.photo;
+    img.style.display = 'block';
+    img.onerror = function () {
+      img.style.display = 'none';
+      if (init) {
+        const parts    = (U.name || 'E').trim().split(' ');
+        init.textContent = (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+        init.style.display = 'flex';
+      }
+    };
+    if (init) init.style.display = 'none';
+  } else if (init) {
+    const parts    = (U.name || 'E').trim().split(' ');
+    init.textContent = (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+    init.style.display = 'flex';
+    if (img) img.style.display = 'none';
+  }
+
+  /* v09: Populate main-hdr avatar slot beside name/PID (Prasidha Jagtap) */
+  const mhlPhoto    = g('mhl-photo');
+  const mhlInitials = g('mhl-initials');
+  if (mhlPhoto && mhlInitials) {
+    const nameParts = (U.name || 'E').trim().split(' ');
+    const initials  = (nameParts[0][0] + (nameParts[1] ? nameParts[1][0] : '')).toUpperCase();
+    if (U.photo) {
+      mhlPhoto.src = U.photo;
+      mhlPhoto.style.display = 'block';
+      mhlInitials.style.display = 'none';
+      mhlPhoto.onerror = function() {
+        mhlPhoto.style.display = 'none';
+        mhlInitials.textContent = initials;
+        mhlInitials.style.display = 'flex';
+      };
+    } else {
+      mhlPhoto.style.display = 'none';
+      mhlInitials.textContent = initials;
+      mhlInitials.style.display = 'flex';
+    }
+  }
+
+  setTx('az-name', U.name || '—');
+  setTx('az-pid',  U.id   || '—');
+  banner.style.display = 'flex';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CAPTURE WINDOW FLOW — v11
+
+   Welcome and main both route every punch through the capture window.
+   The window auto-grabs GPS, shows the live punch time, lets the user
+   name the location, then Confirm writes the punch and returns to main.
+   Re-punching shows a "replaces earlier time" note in the same window.
+   Everything stays on-device until Submit.
+*/
+let captureKind = null;   /* 'in' | 'out' */
+let capCoords   = null;   /* coordinates captured this session */
+let capClockIv  = null;   /* live punch-time interval */
+
+/* Trigger buttons — welcome screen */
+g('btn-w-ci').addEventListener('click', e => { e.preventDefault(); goCapture('in');  });
+g('btn-w-co').addEventListener('click', e => { e.preventDefault(); goCapture('out'); });
+
+/* Trigger buttons — active main screen */
+g('btn-ci').addEventListener('click', e => { e.preventDefault(); goCapture('in');  });
+g('btn-co').addEventListener('click', e => { e.preventDefault(); goCapture('out'); });
+
+/* Capture window controls */
+g('btn-cap-confirm').addEventListener('click', e => { e.preventDefault(); confirmCapture(); });
+g('btn-cap-cancel').addEventListener('click',  e => { e.preventDefault(); cancelCapture(); });
+g('cap-close').addEventListener('click',       e => { e.preventDefault(); cancelCapture(); });
+
+/** goCapture — animate into the capture window for a punch */
+function goCapture(kind) {
+  if (U.submitted) { toast('This shift is already submitted.', 'err'); return; }
+  captureKind = kind;
+  pageTransition(() => { showSection('capture-sec'); enterCapture(kind); },
+                 kind === 'in' ? 'Clock in' : 'Clock out');
+}
+
+/** enterCapture — set up the window then start GPS + live clock */
+function enterCapture(kind) {
+  stopMainLoop();
+  setTx('cap-title', kind === 'in' ? 'Clock in' : 'Clock out');
+  setTx('btn-cap-confirm', kind === 'in' ? 'Confirm clock in' : 'Confirm clock out');
+
+  const existing = kind === 'in' ? U.clockIn : U.clockOut;
+  g('cap-note').classList.toggle('hidden', !existing);
+
+  const sec = g('capture-sec');
+  if (sec) { sec.classList.toggle('cap-in', kind === 'in'); sec.classList.toggle('cap-out', kind === 'out'); }
+
+  const cap = g('cap-loc');
+  if (cap) cap.value = kind === 'in' ? (U.clockInLoc || '') : (U.clockOutLoc || '');
+  showErrIf('err-cap', false);
+  renderChips('cap-loc', 'cap-chips', 'cap-drop');
+
+  startCapClock();
+  startGeoCapture();
+}
+
+/** live punch-time clock inside the capture window */
+function startCapClock() {
+  stopCapClock();
+  const upd = () => setTx('cap-time', fmtClock(new Date()));
+  upd();
+  capClockIv = setInterval(upd, 1000);
+}
+function stopCapClock() { if (capClockIv) { clearInterval(capClockIv); capClockIv = null; } }
+
+/** fmtClock — hh:mm:ss AM/PM */
+function fmtClock(d) {
+  let h = d.getHours(); const m = d.getMinutes(), s = d.getSeconds();
+  const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  const p = n => String(n).padStart(2, '0');
+  return `${p(h)}:${p(m)}:${p(s)} ${ap}`;
+}
+
+/** startGeoCapture — fetch coords, paint the location box state */
+async function startGeoCapture() {
+  capCoords = null;
+  const geo = g('cap-geo'), ic = g('cap-geo-ic'), btn = g('btn-cap-confirm');
+  if (geo) geo.className = 'cap-geo capturing';
+  if (ic) ic.innerHTML = '<svg class="cap-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+  setTx('cap-geo-tx', 'Capturing your location…');
+  setTx('cap-geo-sub', 'Hold on a moment');
+  if (btn) btn.disabled = true;
+
+  markBusy();
+  let coords = null;
+  try { coords = await getCoords(); }
+  catch (e) { console.error('[Seamex] GPS exception:', e); }
+  finally { clearBusy(); }
+
+  /* If the user left the window while we waited, do nothing */
+  if (g('capture-sec')?.classList.contains('hidden')) return;
+
+  if (coords) {
+    capCoords = coords;
+    const approx = U._coordSource === 'ip';
+    if (geo) geo.className = 'cap-geo done' + (approx ? ' approx' : '');
+    if (ic) ic.innerHTML = approx
+      ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'
+      : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTx('cap-geo-tx', approx ? 'Approximate location' : 'Location captured');
+    setTx('cap-geo-sub', coords + (approx ? '  ·  network' : ''));
+    if (btn) btn.disabled = false;
+  } else {
+    if (geo) geo.className = 'cap-geo err';
+    if (ic) ic.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.4" x2="12" y2="16.5"/></svg>';
+    setTx('cap-geo-tx', 'Location unavailable');
+    setTx('cap-geo-sub', 'Tap here to try again');
+    if (btn) btn.disabled = true;
+  }
+}
+
+/** confirmCapture — validate, write the punch, animate back to main */
+function confirmCapture() {
+  const raw = g('cap-loc').value;
+  if (!validateLoc(raw, 'err-cap')) return;
+  if (!capCoords) { toast('Location not captured yet.', 'err'); return; }
+
+  const loc = sanitize(raw);
+  saveLoc(loc);
+  const ts = nowISO();
+
+  if (captureKind === 'in') {
+    U.clockIn = ts; U.clockInCoords = capCoords; U.clockInLoc = loc;
+    U.clockInCoordSource = U._coordSource || 'gps';
+    U.isClockedIn = true;
+  } else {
+    U.clockOut = ts; U.clockOutCoords = capCoords; U.clockOutLoc = loc;
+    U.clockOutCoordSource = U._coordSource || 'gps';
+  }
+  U.lastActionDate = ts;
+  save();
+
+  stopCapClock();
+  const kind = captureKind;
+  captureKind = null; capCoords = null;
+
+  pageTransition(() => { showSection('main-sec'); renderMainBody(); },
+                 kind === 'in' ? 'Clocked in!' : 'Clocked out!');
+  toast(kind === 'in' ? 'Clock-in recorded.' : 'Clock-out recorded.', 'ok');
+}
+
+/** cancelCapture — back out without writing; return to the right screen */
+function cancelCapture() {
+  stopCapClock();
+  captureKind = null; capCoords = null;
+  const back = (!U.clockIn && !U.clockOut) ? 'welcome-sec' : 'main-sec';
+  pageTransition(() => {
+    showSection(back);
+    if (back === 'welcome-sec') renderWelcome(); else renderMainBody();
+  }, 'One moment…');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NEXT-DAY CATCH-UP — v10
+
+   A shift from a previous day that was never submitted is held under
+   KEY_PENDING. On the next open we show a read-only prompt with the
+   last recorded times (blank where a punch is missing). The user can
+   submit it or discard it. They cannot edit a previous day's punches.
+*/
+
+/** freshDay — builds a clean same-identity state for a new day */
+function freshDay(src) {
+  src = src || {};
+  return {
+    name: src.name || '', id: src.id || '', photo: src.photo || '',
+    businessName: src.businessName || '', businessUnit: src.businessUnit || '',
+    businessDesc: src.businessDesc || '', buUnitDesc: src.buUnitDesc || '',
+    clockIn: null,  clockInCoords: '',  clockInLoc: '',
+    clockOut: null, clockOutCoords: '', clockOutLoc: '',
+    isClockedIn: false, submitted: false, lastActionDate: nowISO(),
+    clockInCoordSource: 'gps', clockOutCoordSource: 'gps',
+    _azureEmail: src._azureEmail || ''
+  };
+}
+
+function loadPending() {
+  try { const r = localStorage.getItem(KEY_PENDING); return r ? JSON.parse(r) : null; }
+  catch { return null; }
+}
+function clearPending() { localStorage.removeItem(KEY_PENDING); }
+
+/** checkPending — called at end of renderMain; raises the prompt if needed */
+function checkPending() {
+  const p = loadPending();
+  if (!p) return;
+  if (g('modal-ov')?.classList.contains('open')) return;  /* don't stack */
+  showNextDayPrompt(p);
+}
+
+/** showNextDayPrompt — read-only summary of the held shift */
+function showNextDayPrompt(p) {
+  const dt   = p.lastActionDate ? new Date(p.lastActionDate) : new Date();
+  const dstr = dt.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const inT  = p.clockIn  ? fmt(p.clockIn)  : 'blank';
+  const outT = p.clockOut ? fmt(p.clockOut) : 'blank';
+
+  showModal({
+    icon: '🕛',
+    title: 'Submit your last shift',
+    body: `These are your last recorded times for ${dstr} — Clock in: ${inT}, Clock out: ${outT}. Please submit, or this data will not be saved.`,
+    buttons: [
+      { label: 'Submit now',   cls: 'btn-grn',  fn: () => submitPending(p) },
+      { label: "Don't submit", cls: 'btn-edit', fn: () => { clearPending(); toast('Last shift discarded.'); } }
+    ]
+  });
+}
+
+/** submitPending — sends the held shift to the DB; keeps it on failure */
+async function submitPending(p) {
+  toast('Submitting your last shift…');
+  try {
+    const { error } = await _db.from('attendance').insert([buildPayload(p)]);
+    if (!error) {
+      clearPending();
+      toast('Last shift submitted.', 'ok');
+    } else {
+      console.error('[Seamex] Pending submit error:', error);
+      toast('Could not submit. You will be asked again next time.', 'err');
+    }
+  } catch (e) {
+    console.error('[Seamex] Pending submit network error:', e);
+    toast('Network issue. You will be asked again next time.', 'err');
+  }
+}
+
+/**
+ * buildPayload — single source of truth for the DB record.
+ * Missing punches are sent as null (blank). Status is 'completed'
+ * only when both punches exist, otherwise 'partial'.
+ */
+function buildPayload(rec) {
+  return {
+    user_name:               sanitize(rec.name || ''),
+    employee_id:             (rec.id || '').replace(/\D/g, ''),
+    clock_in_time:           rec.clockIn  || null,
+    clock_in_coords:         rec.clockInCoords  || null,
+    clock_in_location_name:  rec.clockInLoc  ? sanitize(rec.clockInLoc)  : null,
+    clock_out_time:          rec.clockOut || null,
+    clock_out_coords:        rec.clockOutCoords || null,
+    clock_out_location_name: rec.clockOutLoc ? sanitize(rec.clockOutLoc) : null,
+    status:                  (rec.clockIn && rec.clockOut) ? 'completed' : 'partial',
+    business_name:           sanitize(rec.businessName || ''),
+    business_unit:           sanitize(rec.businessUnit || ''),
+    business_desc:           sanitize(rec.businessDesc || ''),
+    bu_unit_desc:            sanitize(rec.buUnitDesc   || ''),
+    clock_in_coord_source:   rec.clockInCoordSource  || 'gps',
+    clock_out_coord_source:  rec.clockOutCoordSource || 'gps'
+  };
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MODAL SYSTEM — Prasidha
+   Generic modal. All content via textContent (XSS safe).
+   Buttons built with createElement.
+*/
+
+/**
+ * showModal — Prasidha
+ * @param {object} opts  { icon, title, body, buttons[], showEditIn }
+ * buttons: [{ label, cls, fn }]
+ */
+function showModal({ icon, title, body, buttons, showEditIn = false }) {
+  setTx('m-icon',  icon  || 'ℹ️');
+  setTx('m-title', title || '');
+  setTx('m-body',  body  || '');
+
+  if (showEditIn) {
+    show('m-edit-in');
+    const inp = g('edit-in-inp');
+    if (inp) { inp.value = U.clockInLoc; setTimeout(() => inp.focus(), 200); }
+  } else {
+    hide('m-edit-in');
+  }
+
+  const btnsEl = g('m-btns');
+  btnsEl.innerHTML = '';
+  buttons.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = `btn-full ${b.cls || 'btn-red'}`;
+    btn.style.cssText = 'margin:0;flex:1';
+    btn.textContent = b.label; /* SECURITY: textContent (Prasidha) */
+    btn.addEventListener('click', (e) => { e.preventDefault(); closeModal(); if (b.fn) b.fn(); });
+    btnsEl.appendChild(btn);
+  });
+
+  g('modal-ov').classList.add('open');
+}
+
+/** closeModal — Prasidha */
+function closeModal() { g('modal-ov').classList.remove('open'); }
+
+g('modal-ov').addEventListener('click', e => { e.preventDefault();
+  if (e.target === g('modal-ov')) closeModal();
+});
+
+/* (v10) Review / Fix-clock-in / Redo-clock-out removed.
+   Corrections are now handled by re-tapping Record now, which
+   shows an override confirm and overwrites the punch in place. */
+
+/* ══════════════════════════════════════════════════════════════
+   SUBMIT DAY
+   Prasidha: isSubmitting guards against double-submit.
+   Final sanitize() pass before DB write (defence-in-depth).
+   SECURITY: raw Supabase error never shown to user.
+*/
+g('btn-submit').addEventListener('click', async (e) => { e.preventDefault();
+  if (isSubmitting) return;
+
+  /* v10: at least one punch required; missing punch is sent blank */
+  if (!U.clockIn && !U.clockOut) {
+    toast('Record a clock-in or clock-out first.', 'err');
+    return;
+  }
+
+  /* Confirm when one side is missing — the blank cannot be added later */
+  if (!U.clockIn || !U.clockOut) {
+    const missing = U.clockIn ? 'clock-out' : 'clock-in';
+    showModal({
+      icon: '⚠️', title: 'Submit with a missing punch?',
+      body: `Your ${missing} is blank and will be submitted empty. You cannot add it after submitting. Continue?`,
+      buttons: [
+        { label: 'Submit anyway', cls: 'btn-grn',  fn: () => doSubmit() },
+        { label: 'Go back',       cls: 'btn-edit', fn: null }
+      ]
+    });
+    return;
+  }
+  doSubmit();
+});
+
+/** doSubmit — writes the current day's record to the DB */
+async function doSubmit() {
+  if (isSubmitting) return;
+  isSubmitting = true;
+
+  const btn = g('btn-submit');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  setTx('ghost-note', "Almost there — submitting your day's work…");
+  show('ghost-scr');
+
+  try {
+    const { error } = await _db.from('attendance').insert([buildPayload(U)]);
+    hide('ghost-scr');
+
+    if (!error) {
+      U.submitted = true; save();
+      clearPending();   /* this device's day is now safely in the DB */
+      pageTransition(() => { showSection('success-sec'); renderSuccess(); }, 'Shift submitted!');
+      toast('All done! See you tomorrow.', 'ok');
+    } else {
+      console.error('[Seamex] Supabase error:', error);
+      const msg = (error && /fetch|network|resolve|connection/i.test(error.message || ''))
+        ? "Can't reach the server. Your shift is saved on this device — try again when you're back online."
+        : 'Submission failed. Your shift is still saved on this device — please try again.';
+      toast(msg, 'err');
+      isSubmitting = false;
+      btn.disabled = false; btn.textContent = 'Submit shift ✓';
+    }
+  } catch (e) {
+    hide('ghost-scr');
+    console.error('[Seamex] Network error:', e);
+    toast("Can't reach the server. Your shift is saved on this device — try again when you're online.", 'err');
+    isSubmitting = false;
+    btn.disabled = false; btn.textContent = 'Submit shift ✓';
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER SUCCESS — Prasidha
+   Visible all day. Stops rAF loop (clock not needed on success).
+*/
+function renderSuccess() {
+  stopMainLoop();
+  const today = new Date();
+  setTx('ss-in-t',  U.clockIn  ? fmt(U.clockIn)  : '— blank —');
+  setTx('ss-in-l',  U.clockIn  ? U.clockInLoc    : '');
+  setTx('ss-out-t', U.clockOut ? fmt(U.clockOut) : '— blank —');
+  setTx('ss-out-l', U.clockOut ? U.clockOutLoc   : '');
+  setTx('ss-dur',   (U.clockIn && U.clockOut) ? duration(U.clockIn, U.clockOut) : '--:--:--');
+  setTx('ss-date',  today.toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  }));
+  show('suc-card');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STUCK BUTTON DETECTOR + RECOVERY — FIX-06 (Prasidha)
+
+   markBusy(): call when a GPS-dependent button is disabled.
+   After 5s, the recovery button (↺) appears next to theme toggle
+   with a spinning animation and a tooltip.
+
+   clearBusy(): called in every finally block after GPS resolves.
+   Hides the recovery button and stops the spin.
+
+   recoverState(): DOM-only re-render. URL unchanged. Session kept.
+   Resets all stuck buttons and re-renders from current U state.
+*/
+
+/** markBusy — Prasidha: starts 5s timer for stuck-button detection */
+function markBusy() {
+  clearBusy();
+  stuckTimer = setTimeout(() => {
+    document.querySelectorAll('.rcv-btn').forEach(b => {
+      b.classList.remove('hidden');
+      b.classList.add('rcv-spin');
+    });
+    document.querySelectorAll('.rcv-tip').forEach(t => {
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 3500);
+    });
+  }, 5000);
+}
+
+/** clearBusy — Prasidha: cancels stuck timer and hides recovery button */
+function clearBusy() {
+  if (stuckTimer) { clearTimeout(stuckTimer); stuckTimer = null; }
+  document.querySelectorAll('.rcv-btn').forEach(b => {
+    b.classList.add('hidden');
+    b.classList.remove('rcv-spin');
+  });
+  document.querySelectorAll('.rcv-tip').forEach(t => t.classList.add('hidden'));
+}
+
+/**
+ * recoverState — Prasidha (FIX-06)
+ * DOM-only recovery. Re-renders from U. URL unchanged. Session kept.
+ * Called by the ↺ recovery button in both footers.
+ */
+function recoverState() {
+  clearBusy();
+  closeModal();
+  stopCapClock();
+
+  /* Reset any button that could be mid-action */
+  const startBtn = g('btn-start');
+  if (startBtn) { startBtn.disabled = false; startBtn.textContent = 'Start Day'; startBtn.classList.remove('hidden'); }
+  const capBtn = g('btn-cap-confirm');
+  if (capBtn) { capBtn.disabled = false; }
+
+  hide('ghost-scr');
+  hide('inline-loader');
+
+  /* If identity isn't resolved yet, we're on auth — just re-enable the form */
+  if (!U.name || !U.id) {
+    setupLoginValidation();
+  } else {
+    captureKind = null; capCoords = null;
+    renderRoot();
+  }
+
+  toast('Page recovered. ↺', 'ok');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GPS — getCoords()
+   ★ FIX-05 (Prasidha) — TRUE Promise.race ★
+
+   Two completely separate Promises:
+     geoPromise    : resolves via getCurrentPosition callback.
+     safetyPromise : resolves null after 9s guaranteed.
+   Promise.race returns whichever settles first.
+
+   This is different from the v06 approach which had ONE Promise
+   with an internal timer — the timer could be bypassed in edge
+   cases on iOS WebKit where the geo callback neither fires
+   success nor error, leaving the function awaiting indefinitely.
+
+   With Promise.race, the maximum wait is always 9s.
+   Combined with the `finally` block in btn-co and btn-ci,
+   the button is guaranteed to re-enable in under 9 seconds.
+*/
+/* ══════════════════════════════════════════════════════════════
+   LOCATION SYSTEM — Prasidha (v08 — Android WebView permanent fix)
+
+   ROOT CAUSE SUMMARY:
+   Android WebView is a separate permission sandbox from the host app.
+   Even when the Flutter app has OS location permission granted,
+   the WebView does NOT inherit it unless the Flutter developer
+   explicitly handles onGeolocationPermissionsShowPrompt.
+   iOS WKWebView inherits permission automatically — that is why
+   iOS works and Android does not. This is an Android OS security
+   boundary that cannot be bypassed from JavaScript.
+
+   FLUTTER HOST APP FIX (permanent — share with app developer):
+   ─────────────────────────────────────────────────────────────
+   In the InAppWebView widget, add this callback:
+
+     InAppWebView(
+       initialSettings: InAppWebViewSettings(
+         geolocationEnabled: true,
+       ),
+       onGeolocationPermissionsShowPrompt: (controller, origin) async {
+         return GeolocationPermissionShowPromptResponse(
+           origin: origin,
+           allow: true,
+           retain: true,
+         );
+       },
+     )
+
+   If the app uses webview_flutter instead of flutter_inappwebview,
+   webview_flutter does NOT expose this callback at all on Android.
+   The app MUST switch to flutter_inappwebview package.
+
+   WEB-SIDE SOLUTION (this file — no host app change needed):
+   ─────────────────────────────────────────────────────────────
+   When navigator.geolocation fails inside Android WebView,
+   fall back to IP-based geolocation via BigDataCloud free API.
+   No API key required. No permission required. Works in any
+   WebView, any container, any platform — it is just an HTTPS fetch.
+
+   Accuracy tradeoff:
+     GPS (navigator.geolocation): 5-10 metres
+     IP geolocation (fallback):   1-5 km (city/area level)
+
+   For attendance verification (confirming employee is at the
+   right site/city), this is sufficient. The coord_source field
+   in the DB record tells HR which method was used.
+
+   MIGRATION NOTE (Prasidha):
+   Add coord_source column to attendance table in Supabase:
+     ALTER TABLE attendance ADD COLUMN coord_source text DEFAULT 'gps';
+   This lets HR filter records by location method in the admin panel.
+*/
+
+/**
+ * getIPCoords — Prasidha
+ * Fetches approximate coordinates from BigDataCloud IP geolocation API.
+ * No API key, no permission, works in every WebView and container.
+ * Returns "lat,lng" string or null on network failure.
+ * Same API used in the Seamex weather widget project.
+ * @returns {Promise<string|null>}
+ */
+async function getIPCoords() {
+  try {
+    const res = await fetch(
+      'https://api.bigdatacloud.net/data/ip-geolocation?localityLanguage=en',
+      { signal: AbortSignal.timeout(8000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const lat = data?.location?.latitude;
+    const lng = data?.location?.longitude;
+    if (!lat || !lng) return null;
+    return `${parseFloat(lat).toFixed(6)},${parseFloat(lng).toFixed(6)}`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * getCoords — Prasidha (v08 — definitive GPS + IP fallback)
+ *
+ * Strategy:
+ *   1. Try navigator.geolocation (GPS) — works on iOS, Chrome, and
+ *      Android WebView once host app is fixed.
+ *   2. If GPS fails (any reason), silently fall back to IP geolocation.
+ *      User sees no error — attendance is recorded with city accuracy.
+ *   3. If both fail (no internet), show error toast.
+ *
+ * The fallback is silent by design. Field employees should not be
+ * blocked from clocking in due to a host app configuration issue.
+ * HR can distinguish GPS vs IP records via the coord_source field.
+ *
+ * @returns {Promise<string|null>} "lat,lng" string or null
+ */
+async function getCoords() {
+  /* ── Step 1: Native GPS — keep the most accurate reading ────
+     watchPosition streams fixes; GPS accuracy improves over the
+     first few seconds. We keep the smallest-accuracy fix, settle
+     early once it is good (≤ 20 m), and always settle by 7 s.
+     A hard 16 s race ceiling guarantees the button re-enables.   */
+  const gpsCoords = await Promise.race([
+    new Promise(resolve => {
+      if (!navigator.geolocation) { resolve(null); return; }
+
+      let best = null, watchId = null, settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        if (watchId !== null) { try { navigator.geolocation.clearWatch(watchId); } catch (_) {} }
+        resolve(best ? `${best.lat.toFixed(6)},${best.lng.toFixed(6)}` : null);
+      };
+
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          pos => {
+            const acc = pos.coords.accuracy || 99999;
+            if (!best || acc < best.acc) {
+              best = { acc, lat: pos.coords.latitude, lng: pos.coords.longitude };
+            }
+            if (acc <= 20) finish();   /* good enough — stop early */
+          },
+          () => finish(),              /* error → settle with best-so-far (may be null) */
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+        /* Collect for up to 7s, then take the best fix we have */
+        setTimeout(finish, 7000);
+      } catch (_) { finish(); }
+    }),
+    new Promise(r => setTimeout(() => r(null), 16000))  /* absolute ceiling */
+  ]);
+
+  if (gpsCoords) {
+    U._coordSource = 'gps';
+    return gpsCoords;
+  }
+
+  /* ── Step 2: IP geolocation fallback (silent, approximate) ─── */
+  toast('GPS unavailable. Using network location…', '');
+  const ipCoords = await getIPCoords();
+
+  if (ipCoords) {
+    U._coordSource = 'ip';
+    return ipCoords;
+  }
+
+  /* ── Step 3: Both failed — genuine connectivity issue ─────── */
+  toast('Location unavailable. Please check your internet connection.', 'err');
+  U._coordSource = null;
+  return null;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   LOCATION CACHE
+   Prasidha: localStorage cache for autocomplete and chips.
+   SECURITY: entries sanitized on write. textContent on all renders.
+   MIGRATION: swap localStorage with sessionStorage or userProfile
+   service when moving to SharePoint SPFx.
+*/
+
+/** getCached — Prasidha: returns cached location array */
+function getCached() {
+  try { return JSON.parse(localStorage.getItem(KEY_LOCS) || '[]'); }
+  catch { return []; }
+}
+
+/** saveLoc — Prasidha: prepends location, deduplicates, trims to MAX_LOCS */
+function saveLoc(loc) {
+  if (!loc) return;
+  let list = getCached().filter(l => l.toLowerCase() !== loc.toLowerCase());
+  list.unshift(loc);
+  localStorage.setItem(KEY_LOCS, JSON.stringify(list.slice(0, MAX_LOCS)));
+}
+
+/**
+ * renderChips — Prasidha
+ * Renders last 3 locations as quick-select pill buttons.
+ * SECURITY: textContent on all chip text — XSS safe.
+ */
+function renderChips(inputId, chipsId, dropId) {
+  const locs = getCached().slice(0, 3);
+  const wrap = g(chipsId); if (!wrap) return;
+  wrap.innerHTML = '';
+  locs.forEach(loc => {
+    const c = document.createElement('button');
+    c.type = 'button'; c.className = 'chip'; c.title = loc;
+    c.textContent = '📍 ' + loc; /* SECURITY: textContent (Prasidha) */
+    c.addEventListener('click', (e) => {
+      e.preventDefault();
+      const inp = g(inputId); if (inp) inp.value = loc;
+      const drop = g(dropId); if (drop) drop.classList.remove('open');
+    });
+    wrap.appendChild(c);
+  });
+}
+
+/**
+ * setupAC — Prasidha
+ * Sets up autocomplete for one input/dropdown pair.
+ * MUST be called only once per input at DOMContentLoaded.
+ * Multiple calls stack document.click listeners — memory leak.
+ */
+function setupAC(inputId, dropId, chipsId) {
+  const input = g(inputId), drop = g(dropId);
+  if (!input || !drop) return;
+  input.addEventListener('focus', () => {
+    renderChips(inputId, chipsId, dropId);
+    renderDrop(inputId, dropId);
+  });
+  input.addEventListener('input', () => renderDrop(inputId, dropId));
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !drop.contains(e.target))
+      drop.classList.remove('open');
+  });
+}
+
+/**
+ * renderDrop — Prasidha
+ * Populates autocomplete dropdown. Max 5 suggestions.
+ * SECURITY: all items via createElement/textContent — XSS safe.
+ */
+function renderDrop(inputId, dropId) {
+  const q    = g(inputId)?.value.toLowerCase().trim();
+  const drop = g(dropId); if (!drop) return;
+  const hits = (q
+    ? getCached().filter(l => l.toLowerCase().includes(q))
+    : getCached()
+  ).slice(0, 5);
+
+  if (!hits.length) { drop.classList.remove('open'); return; }
+  drop.innerHTML = '';
+  hits.forEach(loc => {
+    const item = document.createElement('div');
+    item.className = 'ac-item';
+    const ico = document.createElement('span'); ico.textContent = '📍';
+    const txt = document.createElement('span'); txt.textContent = loc;
+    item.append(ico, txt);
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const inp = g(inputId); if (inp) inp.value = loc;
+      drop.classList.remove('open');
+    });
+    drop.appendChild(item);
+  });
+  drop.classList.add('open');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOAST — Prasidha
+   Centered blur-backdrop overlay. 1.5s auto-dismiss.
+   SECURITY: msg via textContent — never innerHTML.
+*/
+let _toastTimer = null;
+
+/**
+ * toast — Prasidha
+ * @param {string} msg - Message text
+ * @param {'ok'|'err'|''} type - Colour variant
+ */
+function toast(msg, type = '') {
+  const ov   = g('toast-ov');
+  const pill = g('toast-pill');
+  if (!ov || !pill) return;
+
+  if (_toastTimer) { clearTimeout(_toastTimer); _toastTimer = null; }
+
+  pill.textContent = msg; /* SECURITY: textContent (Prasidha) */
+  pill.className = 'toast-pill' + (type ? ' ' + type : '');
+
+  ov.classList.remove('hidden', 'to-out');
+
+  _toastTimer = setTimeout(() => {
+    ov.classList.add('to-out');
+    setTimeout(() => {
+      ov.classList.add('hidden');
+      ov.classList.remove('to-out');
+    }, 280);
+  }, 1500);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HELPERS — see top of file for hoisted function declarations
+*/
+
+/**
+ * isNewDay — Prasidha
+ * True if lastDate was on a previous calendar day.
+ * Drives the midnight session reset.
+ */
+function isNewDay(lastDate) {
+  if (!lastDate) return false;
+  return new Date(lastDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);
+}
+
+/**
+ * fmt — Prasidha
+ * Formats ISO timestamp as HH:MM AM/PM (en-IN locale).
+ */
+function fmt(iso) {
+  if (!iso) return '--:--';
+  return new Date(iso).toLocaleTimeString('en-IN', {
+    hour: '2-digit', minute: '2-digit', hour12: true
+  });
+}
+
+/**
+ * msDur — Prasidha
+ * Converts milliseconds to HH:MM:SS string.
+ * Used by rAF loop for live timer and duration() for frozen display.
+ */
+function msDur(ms) {
+  if (!ms || isNaN(ms) || ms < 0) return '00:00:00';
+  return [
+    Math.floor(ms / 3600000),
+    Math.floor((ms % 3600000) / 60000),
+    Math.floor((ms % 60000) / 1000)
+  ].map(n => n.toString().padStart(2, '0')).join(':');
+}
+
+/**
+ * duration — Prasidha
+ * Computes and formats duration between two ISO timestamps.
+ */
+function duration(inISO, outISO) {
+  if (!inISO || !outISO) return '--';
+  return msDur(new Date(outISO) - new Date(inISO));
+}
+
+/*
+ * ══════════════════════════════════════════════════════════════
+ *  Prasidha Jagtap | IT · Aditya Birla Group (Seamex)
+ *  Geo Attendance v07 — Definitive Golden Build
+ *  Built for field teams. Maintained with care and intent.
+ *  If you are reading this: keep the standards. 🚀
+ * ══════════════════════════════════════════════════════════════
+ */
+</script>
 </body>
 </html>
