@@ -6,7 +6,7 @@
   <title>Seamex · Geo Attendance</title>
 
   <!--
-    SEAMEX GEO-ATTENDANCE | index.html | v13 (single-file, smx- prefix)
+    SEAMEX GEO-ATTENDANCE | index.html | v15 (single-file, smx- prefix)
     Author : Prasidha Jagtap
     Role   : Assistant Manager IT, Aditya Birla Group (Seamex)
     Deploy : onehruat.poornata.com — Script Editor Web Part
@@ -1835,7 +1835,7 @@ section { animation: v12SectionIn .24s ease-out; }
 /* ═══ v13 overrides ═══ */
 
 /* ═══════════════════════════════════════════════════════════════
-   v13 — ISOLATION + BUG FIXES
+   v15 — ISOLATION + BUG FIXES
    All classes prefixed smx- ; root scoped to #smx-root
    ═══════════════════════════════════════════════════════════════ */
 
@@ -2152,6 +2152,182 @@ section { animation: v12SectionIn .24s ease-out; }
   color: var(--smx-ink) !important;
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════════
+   v15 — HIGH-SPECIFICITY OVERRIDES
+   Uses main#smx-root as parent selector to beat SharePoint's
+   corev15.css / init.css / ms-* / s4-* rules.
+   Every selector has ID + element specificity → wins over any
+   class-only rule even with !important.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Root reset — scoped to our container only ── */
+main#smx-root { all: revert; display: block; box-sizing: border-box;
+  font-family: 'DM Sans', system-ui, sans-serif; font-size: 16px;
+  line-height: 1.4; color: var(--tx); background: var(--bg);
+  max-width: 100%; overflow-x: hidden; }
+main#smx-root *, main#smx-root *::before, main#smx-root *::after {
+  box-sizing: border-box; font-family: inherit; line-height: inherit; }
+main#smx-root button, main#smx-root [role="button"] {
+  font: inherit; color: inherit; background: none; border: 0;
+  padding: 0; margin: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  display: inline-flex; align-items: center; justify-content: center; }
+main#smx-root input, main#smx-root textarea {
+  font: inherit; color: inherit; background: transparent;
+  border: 0; outline: none; -webkit-appearance: none; appearance: none; }
+main#smx-root img { display: inline-block; max-width: 100%; height: auto; }
+main#smx-root svg { display: inline-block; max-width: 100%; }
+main#smx-root p, main#smx-root h1, main#smx-root h2, main#smx-root h3,
+main#smx-root h4, main#smx-root h5, main#smx-root h6 { margin: 0; padding: 0; }
+main#smx-root a { color: inherit; text-decoration: none; }
+
+/* ── Welcome buttons — highest specificity ── */
+main#smx-root button.smx-btn-ci,
+main#smx-root button.smx-btn-co {
+  width: 100%; padding: 16px 20px; border-radius: 14px;
+  border: none; font-size: 15px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; cursor: pointer; transition: transform .12s, box-shadow .2s;
+  text-decoration: none; line-height: 1.2;
+  min-height: 52px; max-height: 60px; /* prevent stretching */
+  box-sizing: border-box; }
+main#smx-root button.smx-btn-ci + button.smx-btn-co { margin-top: 10px; }
+main#smx-root button.smx-btn-ci {
+  background: var(--orange); box-shadow: 0 5px 16px rgba(245,130,32,.35); }
+main#smx-root button.smx-btn-co {
+  background: var(--red); box-shadow: 0 5px 16px rgba(166,25,46,.30); }
+main#smx-root button.smx-btn-ci svg,
+main#smx-root button.smx-btn-co svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ── Tile: no overlap — time gets own line, edit icon isolated ── */
+main#smx-root .smx-tile { position: relative; overflow: hidden; }
+main#smx-root button.smx-tile-tap {
+  width: 100%; padding: 14px 44px 14px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: transparent; border: 0; text-align: left; cursor: pointer; }
+main#smx-root .smx-tile-right {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 2px; padding-right: 0; min-width: 0; text-align: right; }
+main#smx-root .smx-tile-time {
+  font-family: 'DM Mono', monospace; font-weight: 700; font-size: 15px;
+  color: var(--tx); white-space: nowrap; display: block; line-height: 1.2; }
+main#smx-root .smx-tile.empty .smx-tile-time {
+  color: var(--txm); font-weight: 400; font-size: 13px; }
+main#smx-root .smx-tile-loc {
+  font-size: 11px; color: var(--tx2); margin-top: 2px;
+  display: flex; align-items: center; gap: 5px; justify-content: flex-end; }
+main#smx-root button.smx-tile-edit {
+  position: absolute; top: 10px; right: 10px;
+  width: 28px; height: 28px; min-width: 28px; min-height: 28px;
+  border-radius: 8px; background: var(--bg-sub); border: 1px solid var(--bdr);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--txm); cursor: pointer; z-index: 3;
+  flex-shrink: 0; box-sizing: border-box; padding: 0; }
+main#smx-root button.smx-tile-edit svg { width: 13px; height: 13px; }
+main#smx-root button.smx-tile-edit.hidden { display: none; }
+
+/* ── Capture window: X button circle, spacing ── */
+main#smx-root .smx-cap-hdr {
+  display: flex; flex-direction: row; align-items: center;
+  justify-content: space-between; margin-bottom: 20px; }
+main#smx-root button.smx-cap-close {
+  width: 32px; height: 32px; min-width: 32px; min-height: 32px;
+  border-radius: 50%; background: var(--bg-sub); border: 1px solid var(--bdr);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; color: var(--txm);
+  flex-shrink: 0; position: static; box-sizing: border-box;
+  padding: 0; line-height: 1; }
+main#smx-root .smx-cap-geo { padding: 24px 16px; margin-bottom: 22px; }
+main#smx-root .smx-cap-geo-tx { font-size: 14px; font-weight: 700; }
+main#smx-root .smx-cap-geo-sub { font-size: 12px; margin-top: 4px; }
+main#smx-root .smx-cap-time-wrap { margin-bottom: 24px; }
+main#smx-root .smx-cap-time-lbl { font-size: 11px; margin-bottom: 6px; }
+main#smx-root .smx-cap-time { font-size: 2rem; }
+main#smx-root .smx-cap-loc-lbl { font-size: 13px; margin-bottom: 10px; }
+main#smx-root button.smx-cap-confirm {
+  width: 100%; padding: 16px; border-radius: 12px;
+  border: none; font-size: 15px; font-weight: 700; cursor: pointer;
+  min-height: 50px; max-height: 56px; box-sizing: border-box; }
+main#smx-root button.smx-cap-cancel {
+  display: block; width: 100%; text-align: center; padding: 12px;
+  font-size: 14px; font-weight: 600; color: var(--txm);
+  cursor: pointer; background: none; border: none; }
+
+/* ── Edit sheet spacing ── */
+main#smx-root .smx-sheet-opt { padding: 16px 14px; margin-bottom: 10px; border-radius: 12px; }
+main#smx-root .smx-sheet-ic { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; }
+main#smx-root .smx-sheet-ic svg { width: 18px; height: 18px; }
+main#smx-root .smx-sheet-tx b { font-size: 14px; margin-bottom: 3px; display: block; }
+main#smx-root .smx-sheet-tx span { font-size: 12px; line-height: 1.4; }
+main#smx-root .smx-sheet-sub { margin-bottom: 18px; }
+main#smx-root button.smx-sheet-cancel {
+  display: block; width: 100%; padding: 14px; text-align: center;
+  font-size: 13px; font-weight: 600; color: var(--tx);
+  background: var(--bg-sub); border: 1px solid var(--bdr);
+  border-radius: 12px; cursor: pointer; margin-top: 4px;
+  box-sizing: border-box; }
+
+/* ── Popup buttons shaped ── */
+main#smx-root .smx-pop-actions { display: flex; gap: 10px; }
+main#smx-root button.smx-pop-cancel {
+  flex: 1; padding: 13px; border-radius: 10px; font-weight: 600;
+  font-size: 13px; background: var(--bg-sub); color: var(--tx);
+  border: 1px solid var(--bdr); cursor: pointer; box-sizing: border-box; }
+main#smx-root button.smx-pop-confirm {
+  flex: 1; padding: 13px; border-radius: 10px; font-weight: 700;
+  font-size: 13px; background: linear-gradient(135deg, var(--orange), var(--red));
+  color: #fff; border: none; cursor: pointer; }
+main#smx-root input.smx-pop-input {
+  width: 100%; padding: 13px 14px; border: 1px solid var(--orange);
+  background: var(--bg-sub); border-radius: 10px; font-size: 14px;
+  color: var(--tx); margin-bottom: 16px; box-sizing: border-box; }
+
+/* ── Submitted page — logo always text, bigger text ── */
+main#smx-root .smx-suc-logo {
+  font-weight: 800; font-size: 20px; letter-spacing: -0.5px;
+  background: linear-gradient(90deg, var(--red), var(--orange));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  display: block; text-align: center; margin-bottom: 18px; }
+main#smx-root .smx-suc-lab { font-size: 13px; }
+main#smx-root .smx-suc-row-r b { font-size: 15px; font-weight: 700; }
+main#smx-root .smx-suc-dur-val { font-size: 24px; font-weight: 700; }
+main#smx-root .smx-suc-name { font-size: 17px; font-weight: 700; }
+main#smx-root .smx-suc-msg { font-size: 17px; font-weight: 700; }
+
+/* ── Dark mode — logo yellow + glow ── */
+:root[data-theme="dark"] main#smx-root .smx-hdr-logo,
+:root[data-theme="dark"] main#smx-root .smx-wel-logo,
+:root[data-theme="dark"] main#smx-root .smx-suc-logo {
+  background: linear-gradient(90deg, #FFD442, #FF9A40);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 4px rgba(255,212,66,.25)); }
+:root[data-theme="dark"] main#smx-root #timer-val,
+:root[data-theme="dark"] main#smx-root .smx-hero-val {
+  text-shadow: 0 0 12px rgba(255,154,64,.22); }
+:root[data-theme="dark"] main#smx-root .smx-hdr-clock {
+  text-shadow: 0 0 8px rgba(255,154,64,.18); }
+:root[data-theme="dark"] main#smx-root button.smx-sheet-cancel {
+  background: var(--bg-sub); border-color: var(--bdr); color: var(--tx); }
+:root[data-theme="dark"] main#smx-root button.smx-pop-cancel {
+  background: var(--bg-sub); border-color: var(--bdr); color: var(--tx); }
+
+/* ── Footer disclaimer — bigger ── */
+main#smx-root .smx-ftr-disc { font-size: 11px; color: var(--txm); line-height: 1.4; }
+
+/* ── Submit hold button — constrained size ── */
+main#smx-root .smx-sub-btn {
+  position: relative; width: 140px; height: 140px; border-radius: 50%;
+  margin: 8px auto 10px; user-select: none; -webkit-user-select: none;
+  touch-action: manipulation; cursor: pointer; }
+main#smx-root .smx-sub-inner {
+  position: absolute; inset: 18px; border-radius: 50%;
+  background: var(--card-bg); display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: var(--tx); font-weight: 700; font-size: 14px;
+  border: 1px solid var(--bdr); letter-spacing: 0.3px; }
+
 </style>
 </head>
 <body onsubmit="return false;">
@@ -2326,8 +2502,8 @@ section { animation: v12SectionIn .24s ease-out; }
       <div class="smx-hdr">
         <div class="smx-hdr-left">
           <img class="smx-hdr-logo" id="smx-logo-sm" src="" alt="Seamex">
-          <div class="smx-hdr-clock" id="hdr-clock">--:--:--</div>
-          <div class="smx-hdr-date"  id="hdr-date">--</div>
+          <div class="smx-hdr-clock" id="smx-hdr-clock">--:--:--</div>
+          <div class="smx-hdr-date"  id="smx-hdr-date">--</div>
         </div>
         <div class="smx-hdr-right">
           <div class="smx-hdr-text">
@@ -2600,7 +2776,7 @@ section { animation: v12SectionIn .24s ease-out; }
 <script>
 /*
  * ══════════════════════════════════════════════════════════════
- *  SEAMEX GEO-ATTENDANCE  |  inlined     |  v13 — SharePoint Production Build (single-file, no external assets, smx- prefix)
+ *  SEAMEX GEO-ATTENDANCE  |  inlined     |  v15 — SharePoint Production Build (single-file, no external assets, smx- prefix)
  *  Author : Prasidha Jagtap
  *  Role   : Assistant Manager – IT, Aditya Birla Group (Seamex)
  *  Office : Reliable Tech Park, Airoli, Maharashtra
@@ -3136,12 +3312,20 @@ function startMainLoop() {
       const mm = d.getMinutes().toString().padStart(2, '0');
       const ss = sc.toString().padStart(2, '0');
 
-      setTx('hdr-clock', `${hh}:${mm}:${ss}`);
-      setTx('hdr-date', d.toLocaleDateString('en-IN', {
+      setTx('smx-hdr-clock', `${hh}:${mm}:${ss}`);
+      setTx('smx-hdr-date', d.toLocaleDateString('en-IN', {
         weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
       }));
 
-      /* v12: hero block is static — no running counter. Only header clock ticks. */
+      /* v15: CI-only = running shift timer */
+      if (U.clockIn && !U.clockOut && !U.submitted) {
+        var _ms = Date.now() - new Date(U.clockIn).getTime();
+        if (_ms < 0) _ms = 0;
+        var _hh = String(Math.floor(_ms/3600000)).padStart(2,'0');
+        var _mm = String(Math.floor((_ms%3600000)/60000)).padStart(2,'0');
+        var _ss = String(Math.floor((_ms%60000)/1000)).padStart(2,'0');
+        var _tv = g('timer-val'); if (_tv) _tv.textContent = _hh+':'+_mm+':'+_ss;
+      }
     }
     rafId = requestAnimationFrame(loop);
   }
@@ -3460,9 +3644,14 @@ function renderPunchDisplay() {
       if (heroSub) heroSub.textContent = '';
       break;
     case 'ci-only':
-      heroLbl.textContent = 'Clocked in';
-      heroVal.textContent = fmt(U.clockIn);
-      if (heroSub) heroSub.textContent = 'Clock out awaiting';
+      heroLbl.textContent = 'Current shift';
+      /* Initial paint — show 00:00:00; startMainLoop ticks it every frame */
+      {
+        var _ms0 = Date.now() - new Date(U.clockIn).getTime();
+        if (_ms0 < 0) _ms0 = 0;
+        heroVal.textContent = String(Math.floor(_ms0/3600000)).padStart(2,'0')+':'+String(Math.floor((_ms0%3600000)/60000)).padStart(2,'0')+':'+String(Math.floor((_ms0%60000)/1000)).padStart(2,'0');
+      }
+      if (heroSub) heroSub.textContent = 'Since ' + fmt(U.clockIn) + ' \u00b7 Clock out awaiting';
       break;
     case 'co-only':
       heroLbl.textContent = 'Clocked out';
@@ -3589,22 +3778,28 @@ function v12Confirm(title, msg, okLabel, onYes) {
 /* ── Mark time now ── */
 function v12HandleMarkTime() {
   if (!v12EditTarget) return;
-  const which = v12EditTarget;
-  const t = which === 'ci' ? 'clock-in' : 'clock-out';
-  v12Confirm(
-    'Mark time now?',
-    'This will update the ' + t + ' time to right now. Location stays the same.',
-    'Yes, update',
-    function () {
-      const iso = nowISO();
-      if (which === 'ci') U.clockIn  = iso;
-      else                U.clockOut = iso;
-      U.lastActionDate = iso;
-      save();
-      renderPunchDisplay();
-      toast((which === 'ci' ? 'Clock-in' : 'Clock-out') + ' time updated', 'ok');
-    }
-  );
+  var which = v12EditTarget;
+  var t = which === 'ci' ? 'clock-in' : 'clock-out';
+  var _mkIv = null;
+  function _gMsg() {
+    var _n = new Date(), _h = _n.getHours(), _m = _n.getMinutes(), _s = _n.getSeconds();
+    var _ap = _h >= 12 ? 'pm' : 'am';
+    var _h12 = ((_h % 12) || 12).toString().padStart(2, '0');
+    return 'Your ' + t + ' will be marked at ' + _h12 + ':' + _m.toString().padStart(2,'0') + ':' + _s.toString().padStart(2,'0') + ' ' + _ap + '. Location stays the same.';
+  }
+  v12Confirm('Mark time now?', _gMsg(), 'Yes, update', function () {
+    if (_mkIv) clearInterval(_mkIv);
+    var iso = nowISO();
+    if (which === 'ci') U.clockIn = iso; else U.clockOut = iso;
+    U.lastActionDate = iso; save(); renderPunchDisplay();
+    toast((which === 'ci' ? 'Clock-in' : 'Clock-out') + ' time updated', 'ok');
+  });
+  _mkIv = setInterval(function () {
+    var _bd = g('confirm-backdrop');
+    if (_bd && !_bd.classList.contains('hidden')) {
+      var _me = g('confirm-msg'); if (_me) _me.textContent = _gMsg();
+    } else { clearInterval(_mkIv); }
+  }, 1000);
 }
 
 /* ── Rename location ── */
@@ -4162,6 +4357,16 @@ if (g('btn-submit')) g('btn-submit').addEventListener('click', async (e) => { e.
 /** doSubmit — writes the current day's record to the DB */
 async function doSubmit() {
   if (isSubmitting) return;
+  /* v15: soft nudge on missing punch */
+  if (!U.clockIn && !U.clockOut) {
+    v12ResetSubmitHold();
+    toast('Please record at least a clock-in or clock-out first.', 'err');
+    return;
+  }
+  if (!U.clockIn || !U.clockOut) {
+    var _miss = U.clockIn ? 'clock-out' : 'clock-in';
+    toast('Heads up: your ' + _miss + ' is missing. Submitting as-is.', '');
+  }
   isSubmitting = true;
 
   const btn = g('btn-submit');
