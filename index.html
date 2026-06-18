@@ -6,7 +6,7 @@
   <title>Seamex · Geo Attendance</title>
 
   <!--
-    SEAMEX GEO-ATTENDANCE | index.html | v18b (single-file, smx- prefix)
+    SEAMEX GEO-ATTENDANCE | index.html | v20 (single-file, smx- prefix)
     Author : Prasidha Jagtap
     Role   : Assistant Manager IT, Aditya Birla Group (Seamex)
     Deploy : onehruat.poornata.com — Script Editor Web Part
@@ -54,7 +54,7 @@
   <style>
 
 /* ═══════════════════════════════════════════════════════════════
-   v18b — IFRAME ISOLATION + EXPLICIT FIXES
+   v20 — IFRAME ISOLATION + EXPLICIT FIXES
    Designed for SharePoint Page Viewer Web Part (iframe).
    `.smx-wrap` reset defeats any host CSS that may bleed in.
    ═══════════════════════════════════════════════════════════════ */
@@ -1990,7 +1990,7 @@ section { animation: v12SectionIn .24s ease-out; }
 /* ═══ v13 overrides ═══ */
 
 /* ═══════════════════════════════════════════════════════════════
-   v18 — ISOLATION + BUG FIXES
+   v20 — ISOLATION + BUG FIXES
    All classes prefixed smx- ; root scoped to #smx-root
    ═══════════════════════════════════════════════════════════════ */
 
@@ -2310,7 +2310,7 @@ section { animation: v12SectionIn .24s ease-out; }
 
 
 /* ═══════════════════════════════════════════════════════════════
-   v18 — HIGH-SPECIFICITY OVERRIDES
+   v20 — HIGH-SPECIFICITY OVERRIDES
    Uses .smx-wrap as parent selector to beat SharePoint's
    corev15.css / init.css / ms-* / s4-* rules.
    Every selector has ID + element specificity → wins over any
@@ -2487,7 +2487,7 @@ section { animation: v12SectionIn .24s ease-out; }
 /* ════ v16 spacing rhythm ════ */
 
 /* ═══════════════════════════════════════════════════════════════
-   v18 — 24/12/6 SPACING RHYTHM + VERTICAL CENTERING
+   v20 — 24/12/6 SPACING RHYTHM + VERTICAL CENTERING
    Applies to all 5 screens uniformly.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -2775,7 +2775,7 @@ section { animation: v12SectionIn .24s ease-out; }
 .smx-wrap .smx-pop .smx-pop-actions { gap: 11px !important; padding: 0 !important; }
 
 
-/* ════ v18b — Shift details card breathing room (matches v12/v14) ════ */
+/* ════ v20 — Shift details card breathing room (matches v12/v14) ════ */
 .smx-wrap .smx-suc-card {
   padding: 20px 18px !important;
   border-radius: 14px !important;
@@ -2808,6 +2808,61 @@ section { animation: v12SectionIn .24s ease-out; }
 }
 .smx-wrap .smx-suc-card .smx-suc-dur-wrap b {
   margin-top: 8px !important;
+}
+
+
+/* ════ v20 — Shift summary card breathing room (match v12 generous feel) ════ */
+.smx-wrap .smx-suc-card {
+  padding: 24px 20px !important;
+  border-radius: 14px !important;
+  margin-top: 8px !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-row {
+  padding: 18px 0 !important;
+  align-items: flex-start !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-row:first-child {
+  padding-top: 6px !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-row:nth-last-child(2) {
+  padding-bottom: 22px !important;
+  border-bottom: none !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-row-r {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 6px !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-row-r b {
+  font-size: 15px !important;
+  line-height: 1.2 !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-loc {
+  font-size: 11px !important;
+  margin-top: 0 !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-dur-wrap {
+  padding: 22px 18px !important;
+  margin-top: 20px !important;
+  border-radius: 14px !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-dur-lbl {
+  font-size: 11px !important;
+  letter-spacing: 1.5px !important;
+}
+.smx-wrap .smx-suc-card .smx-suc-dur-wrap b,
+.smx-wrap .smx-suc-card .smx-suc-dur-val {
+  margin-top: 10px !important;
+  font-size: 26px !important;
+  line-height: 1.1 !important;
+}
+
+
+/* ════ v20 — Shell padding minimized: card flush with iframe edge ════ */
+.smx-wrap .smx-shell {
+  padding: 4px !important;
+  box-sizing: border-box !important;
 }
 
 </style>
@@ -3260,7 +3315,7 @@ section { animation: v12SectionIn .24s ease-out; }
 <script>
 /*
  * ══════════════════════════════════════════════════════════════
- *  SEAMEX GEO-ATTENDANCE  |  inlined     |  v18 — SharePoint Production Build (single-file, no external assets, smx- prefix)
+ *  SEAMEX GEO-ATTENDANCE  |  inlined     |  v20 — SharePoint Production Build (single-file, no external assets, smx- prefix)
  *  Author : Prasidha Jagtap
  *  Role   : Assistant Manager – IT, Aditya Birla Group (Seamex)
  *  Office : Reliable Tech Park, Airoli, Maharashtra
@@ -4844,17 +4899,25 @@ if (g('btn-submit')) g('btn-submit').addEventListener('click', async (e) => { e.
 });
 
 /** doSubmit — writes the current day's record to the DB */
-async function doSubmit() {
+async function doSubmit(_confirmed) {
   if (isSubmitting) return;
-  /* v15: soft nudge on missing punch */
+  /* v19: empty-state still blocks */
   if (!U.clockIn && !U.clockOut) {
     v12ResetSubmitHold();
     toast('Please record at least a clock-in or clock-out first.', 'err');
     return;
   }
-  if (!U.clockIn || !U.clockOut) {
+  /* v19: missing one punch — show confirmation popup, NOT a passing toast */
+  if ((!U.clockIn || !U.clockOut) && !_confirmed) {
+    v12ResetSubmitHold();
     var _miss = U.clockIn ? 'clock-out' : 'clock-in';
-    toast('Heads up: your ' + _miss + ' is missing. Submitting as-is.', '');
+    v12Confirm(
+      'Submit incomplete shift?',
+      'Your ' + _miss + ' is missing. Submit anyway?',
+      'Submit anyway',
+      function () { doSubmit(true); }
+    );
+    return;
   }
   isSubmitting = true;
 
